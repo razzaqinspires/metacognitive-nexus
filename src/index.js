@@ -144,3 +144,5 @@ export class MetacognitiveNexus {
         return this.#dso;
     }
 }
+
+export { Logger };
