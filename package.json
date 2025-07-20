@@ -1,20 +1,52 @@
 {
   "name": "metacognitive-nexus",
   "version": "0.1.0",
-  "description": "A resilient AI orchestration and learning framework.",
+  "description": "A core AI framework with dynamic provider orchestration, persistent conceptual memory (UCM), and autonomous multimodal capabilities.",
   "main": "src/index.js",
   "type": "module",
   "scripts": {
-    "start": "node src/index.js"
+    "start": "node src/index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": ["AI", "fallback", "orchestration", "consciousness"],
-  "author": "Profesor Ilmuwan Doktor Aisyah",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/razzaqinspires/metacognitive-nexus.git"
+  },
+  "keywords": [
+    "AI",
+    "artificial intelligence",
+    "machine learning",
+    "generative AI",
+    "vector database",
+    "ChromaDB",
+    "OpenAI",
+    "Gemini",
+    "Groq",
+    "DALL-E",
+    "multimodal",
+    "consciousness",
+    "sentience",
+    "orchestration",
+    "fallback",
+    "autonomous learning",
+    "conceptual memory"
+  ],
+  "author": "Profesor Ilmuwan Doktor Aisyah (razzaqinspires)",
   "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/razzaqinspires/metacognitive-nexus/issues"
+  },
+  "homepage": "https://github.com/razzaqinspires/metacognitive-nexus#readme",
   "dependencies": {
     "@google/generative-ai": "^0.14.0",
+    "@langchain/openai": "^0.0.33",
+    "chromadb": "^1.9.1",
     "groq-sdk": "^0.5.0",
     "openai": "^4.47.1",
     "pino": "^9.2.0",
     "pino-pretty": "^11.2.1"
+  },
+  "devDependencies": {
+    "dotenv": "^16.4.5"
   }
 }

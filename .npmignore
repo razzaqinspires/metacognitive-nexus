@@ -1,0 +1,17 @@
+# Exclude development-specific files and directories from NPM package
+.github/
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+/docs/ # If you have a separate docs folder for your website
+/tests/ # If you have a dedicated test folder
+
+# Exclude local data that shouldn't be part of the package
+data/
+chroma_db/
+
+# Node.js specific
+npm-debug.log
+yarn-debug.log
+*.tsbuildinfo

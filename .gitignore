@@ -1,0 +1,35 @@
+# Node.js
+node_modules/
+npm-debug.log
+yarn-debug.log
+.pnpm-debug.log
+.pnpm-store/
+.npm/
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Build artifacts
+dist/
+build/
+*.tsbuildinfo
+
+# IDE files
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Persistent data for Metacognitive Nexus
+data/
+# Jika ChromaDB menggunakan path khusus, pastikan path itu diabaikan juga
+# Misalnya jika Anda menginisialisasi ChromaClient({ path: "./chroma_db" })
+chroma_db/
