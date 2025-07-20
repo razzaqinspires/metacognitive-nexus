@@ -33,3 +33,4 @@ data/
 # Jika ChromaDB menggunakan path khusus, pastikan path itu diabaikan juga
 # Misalnya jika Anda menginisialisasi ChromaClient({ path: "./chroma_db" })
 chroma_db/
+package-lock.json
