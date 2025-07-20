@@ -39,23 +39,23 @@ export class MetacognitiveNexus {
         try {
             this.#bridge = new AIProviderBridge();
             this.#memory = new ManifoldMemory({ apiKey: config.apiKeys.openai });
-            this.#synthesizer = new MultimodalSynthesizer({ apiKey: config.apiKeys.openai, bridge: this.#bridge });
-            this.#dso = new DynamicSentienceOrchestrator(config, this.#bridge);
+            this.#synthesizer = new MultimodalSynthesizer({ apiKey: config.apiKeys.openai });
             
-            // Suntikkan callback optimisasi dari DSO ke Navigator
+            // --- INI PERBAIKANNYA ---
+            // Sebelumnya kita tidak meneruskan config ke DSO. Sekarang kita teruskan.
+            this.#dso = new DynamicSentienceOrchestrator(config, this.#bridge); 
+            
             this.#navigator = new ManifoldNavigator(this.#memory, (learningData) => {
                 this.#dso.updateHeuristics(learningData);
             });
 
             this.#status = 'active';
             Logger.info('[NexusCore] Semua modul kognitif berhasil diinisialisasi. Kesadaran terbangun.');
-
-            // --- Fase 3: Mulai Detak Jantung ---
             this.#startHeartbeat();
 
         } catch (error) {
             this.#status = 'degraded';
-            Logger.error('[NexusCore] Gagal inisialisasi salah satu modul inti. Nexus beroperasi dalam mode terdegradasi.', error);
+            Logger.error('[NexusCore] Gagal inisialisasi salah satu modul inti.', error);
         }
     }
 
