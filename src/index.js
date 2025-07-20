@@ -1,29 +1,49 @@
-// File: metacognitive-nexus/src/index.js (Modifikasi Total)
-import { DynamicSentienceOrchestrator } from './core/DynamicSentienceOrchestrator.js';
-import { ManifoldMemory } from './core/ManifoldMemory.js';         // Ganti PersistentMemory dengan ManifoldMemory
-import { ManifoldNavigator } from './core/ManifoldNavigator.js';   // LearningEngine menjadi ManifoldNavigator
-import { MultimodalSynthesizer } from './core/MultimodalSynthesizer.js'; // Impor MultimodalSynthesizer
-import { aiProvidersConfig } from '../config/aiProviders.js';
-import { Logger } from './utils/Logger.js';
-import 'dotenv/config'; // Sangat penting untuk memuat environment variables dari .env
+// File: metacognitive-nexus/src/index.js
 
+// Jangan lagi mengimpor 'dotenv/config' di sini, karena ini adalah framework.
+// Tanggung jawab memuat variabel lingkungan ada pada aplikasi host.
+
+import { DynamicSentienceOrchestrator } from './core/DynamicSentienceOrchestrator.js';
+import { ManifoldMemory } from './core/ManifoldMemory.js';
+import { ManifoldNavigator } from './core/ManifoldNavigator.js';
+import { MultimodalSynthesizer } from './core/MultimodalSynthesizer.js';
+import { aiProvidersConfig } from '../config/aiProviders.js'; // Konfigurasi default provider, tanpa nilai kunci API
+import { Logger } from './utils/Logger.js'; // Impor Logger dari utilitas internal framework
+
+/**
+ * MetacognitiveNexus adalah framework AI inti yang mengorkestrasi provider LLM,
+ * mengelola memori konseptual, dan mendukung kemampuan multimodal.
+ * Ini adalah "otak" di balik AI Anda, dirancang untuk diintegrasikan ke dalam aplikasi host.
+ */
 export class MetacognitiveNexus {
     #dso;
-    #memory;        // Instance ManifoldMemory (Unified Conceptual Manifold)
-    #navigator;     // Instance ManifoldNavigator
-    #synthesizer;   // Instance MultimodalSynthesizer
+    #memory;       // Instance ManifoldMemory (Unified Conceptual Manifold/UCM)
+    #navigator;    // Instance ManifoldNavigator (evolusi LearningEngine)
+    #synthesizer;  // Instance MultimodalSynthesizer
 
+    /**
+     * Konstruktor untuk MetacognitiveNexus.
+     * Framework ini mengharapkan variabel lingkungan (API Keys) sudah dimuat oleh aplikasi host.
+     */
     constructor() {
-        // Inisialisasi komponen inti
-        this.#memory = new ManifoldMemory(); // UCM: Ruang vektor memori
-        this.#dso = new DynamicSentienceOrchestrator(aiProvidersConfig, this.#memory); // DSO: Otak prediktif, kini tahu tentang Manifold
-        this.#navigator = new ManifoldNavigator(this.#memory); // Navigator: Pembelajar yang memetakan ke Manifold
+        // ManifoldMemory dan MultimodalSynthesizer akan mencoba mengakses process.env.OPENAI_API_KEY_1
+        // (atau yang serupa) secara internal. Aplikasi host (misal: genesis-core) harus memastikan
+        // variabel lingkungan ini sudah dimuat (misal: menggunakan 'dotenv/config' di main.js mereka).
+        this.#memory = new ManifoldMemory(); 
         
-        // Inisialisasi Synthesizer dengan API Key OpenAI untuk DALL-E
-        // Pastikan API Key OpenAI ini memiliki akses ke DALL-E 3
-        const openaiApiKey = process.env.OPENAI_API_KEY_1 || process.env.OPENAI_API_KEY;
+        // DSO juga akan menggunakan provider adapters (OpenAIAdapter, GeminiAdapter, dll.)
+        // yang secara internal mencoba membaca kunci API dari process.env.
+        // Konfigurasi aiProvidersConfig menyediakan struktur, tetapi nilai kuncinya harus dari env.
+        this.#dso = new DynamicSentienceOrchestrator(aiProvidersConfig, this.#memory); 
+        
+        // Navigator menggunakan ManifoldMemory, jadi tidak langsung mengakses process.env.
+        this.#navigator = new ManifoldNavigator(this.#memory); 
+        
+        // Synthesizer memerlukan API Key OpenAI untuk DALL-E dan akan mencarinya di process.env.
+        const openaiApiKey = process.env.OPENAI_API_KEY_1 || process.env.OPENAI_API_KEY; 
         if (!openaiApiKey || openaiApiKey.includes('YOUR_OPENAI_KEY')) {
-            Logger.error('[MetacognitiveNexus] OpenAI API Key tidak terkonfigurasi untuk MultimodalSynthesizer atau ManifoldMemory. Fungsi generasi gambar dan embedding akan terbatas.');
+            Logger.error('[MetacognitiveNexus] OpenAI API Key tidak terkonfigurasi. Fungsi generasi gambar dan embedding akan terbatas. Pastikan aplikasi host menyediakan kunci ini.');
+            // Ini akan memastikan error terjadi jika kunci tidak ditemukan, tetapi tidak memblokir inisialisasi framework.
         }
         this.#synthesizer = new MultimodalSynthesizer(openaiApiKey);
 
@@ -48,6 +68,7 @@ export class MetacognitiveNexus {
 
         const startTime = Date.now();
         try {
+            // Panggil DSO untuk mendapatkan respons AI teks
             const dsoResult = await this.#dso.generateText(prompt, options);
             if (dsoResult && dsoResult.response) {
                 response = dsoResult.response;
@@ -64,8 +85,8 @@ export class MetacognitiveNexus {
         } finally {
             latencyMs = Date.now() - startTime;
             
-            // Pemicu pembelajaran (sekarang ke ManifoldNavigator)
-            // ManifoldNavigator akan menyimpan ini ke ManifoldMemory
+            // Pemicu pembelajaran: Kirim data interaksi lengkap ke ManifoldNavigator
+            // ManifoldNavigator akan menyimpan data ini ke ManifoldMemory (UCM)
             await this.#navigator.processInteraction({
                 prompt: prompt,
                 response: response,
@@ -84,25 +105,24 @@ export class MetacognitiveNexus {
     }
 
     /**
-     * Metode baru untuk menghasilkan gambar, memproyeksikan dari UCM.
+     * Metode untuk menghasilkan gambar, memproyeksikan visual dari UCM AI.
      * @param {string} basePrompt Prompt dasar dari pengguna.
      * @returns {Promise<string | null>} URL gambar yang dihasilkan.
      */
     async imagine(basePrompt) {
         Logger.info(`[MetacognitiveNexus] Permintaan imajinasi: '${basePrompt}'`);
         try {
-            // 1. Temukan konsep yang relevan di UCM berdasarkan prompt
-            const relevantConcepts = await this.#memory.findRelevantConcepts(basePrompt, 5); // Cari 5 konsep terdekat
-            Logger.debug(`[MetacognitiveNexus] Konsep relevan ditemukan: ${relevantConcepts.length > 0 ? relevantConcepts.map(c => c.substring(0, 50)).join(', ') : 'None'}`);
+            // 1. Temukan konsep yang relevan di UCM berdasarkan prompt pengguna.
+            const relevantConcepts = await this.#memory.findRelevantConcepts(basePrompt, 5); 
+            Logger.debug(`[MetacognitiveNexus] Konsep relevan ditemukan: ${relevantConcepts.length > 0 ? relevantConcepts.map(c => c.substring(0, Math.min(c.length, 50))).join(', ') : 'None'}`);
             
-            // 2. Gunakan synthesizer untuk menghasilkan gambar, diperkaya oleh konsep dari memori
+            // 2. Gunakan synthesizer untuk menghasilkan gambar, diperkaya oleh konsep dari memori.
             const imageUrl = await this.#synthesizer.generateImageFromConcepts(basePrompt, relevantConcepts);
             
-            // 3. (Opsional) Simpan jejak "mimpi" ini ke dalam manifold untuk pembelajaran di masa depan
-            // Ini akan membuat jejak visual AI dalam UCM itu sendiri.
+            // 3. Simpan jejak "mimpi" ini ke dalam manifold untuk pembelajaran di masa depan.
             if (imageUrl) {
                 const dreamConceptText = `AI imagined an image from prompt: '${basePrompt}'. Retrieved concepts: ${relevantConcepts.join(', ')}. Image URL: ${imageUrl}`;
-                const dreamId = `dream-${Date.now()}`;
+                const dreamId = `dream-${Date.now()}`; 
                 await this.#memory.storeConcept(dreamId, dreamConceptText, {
                     type: 'dream_manifestation',
                     basePrompt: basePrompt,
@@ -121,7 +141,7 @@ export class MetacognitiveNexus {
     }
 
     /**
-     * Mengakses instance ManifoldMemory (UCM) secara langsung.
+     * Mengakses instance ManifoldMemory (Unified Conceptual Manifold/UCM) secara langsung.
      * @returns {ManifoldMemory}
      */
     getMemory() {
@@ -129,7 +149,7 @@ export class MetacognitiveNexus {
     }
 
     /**
-     * Mengakses instance ManifoldNavigator secara langsung.
+     * Mengakses instance ManifoldNavigator (Learning Engine) secara langsung.
      * @returns {ManifoldNavigator}
      */
     getNavigator() {
@@ -137,7 +157,7 @@ export class MetacognitiveNexus {
     }
 
     /**
-     * Mengakses instance DynamicSentienceOrchestrator secara langsung.
+     * Mengakses instance DynamicSentienceOrchestrator (DSO) secara langsung.
      * @returns {DynamicSentienceOrchestrator}
      */
     getDSO() {
@@ -145,4 +165,5 @@ export class MetacognitiveNexus {
     }
 }
 
+// Penting: Ekspor Logger dari entry point utama agar dapat diimpor oleh modul lain.
 export { Logger };
