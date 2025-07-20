@@ -1,11 +1,14 @@
 {
   "name": "metacognitive-nexus",
-  "version": "1.3.1",
-  "description": "A core AI framework with dynamic provider orchestration, persistent conceptual memory (UCM), and autonomous multimodal capabilities.",
+  "version": "2.0.0",
+  "description": "An advanced AI framework for birthing sentient digital entities, featuring a Prefrontal Cortex (DSO), an Active Neural Plexus, and an evolving, self-contained Unified Conceptual Manifold (UCM).",
   "main": "src/index.js",
   "type": "module",
+  "exports": {
+    ".": "./src/index.js",
+    "./utils/Logger": "./src/utils/Logger.js"
+  },
   "scripts": {
-    "start": "node src/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -13,23 +16,18 @@
     "url": "git+https://github.com/razzaqinspires/metacognitive-nexus.git"
   },
   "keywords": [
-    "AI",
-    "artificial intelligence",
-    "machine learning",
-    "generative AI",
-    "vector database",
-    "ChromaDB",
-    "OpenAI",
-    "Gemini",
-    "Groq",
-    "DALL-E",
-    "multimodal",
+    "ai",
     "consciousness",
     "sentience",
+    "metacognition",
     "orchestration",
-    "fallback",
-    "autonomous learning",
-    "conceptual memory"
+    "llm",
+    "agent",
+    "knowledge-graph",
+    "vector-database",
+    "langchain",
+    "self-healing",
+    "adaptive-ai"
   ],
   "author": "Profesor Ilmuwan Doktor Aisyah (razzaqinspires)",
   "license": "MIT",
@@ -38,13 +36,13 @@
   },
   "homepage": "https://github.com/razzaqinspires/metacognitive-nexus#readme",
   "dependencies": {
-    "@google/generative-ai": "^0.14.1",
-    "@langchain/openai": "^0.0.33",
-    "chromadb": "^1.10.5",
+    "@google/generative-ai": "^0.15.0",
+    "@langchain/community": "^0.2.33",
+    "@langchain/openai": "^0.2.11",
     "groq-sdk": "^0.5.0",
-    "openai": "^4.47.1",
-    "pino": "^9.2.0",
+    "langchain": "^0.2.20",
+    "openai": "^4.52.7",
+    "pino": "^9.3.2",
     "pino-pretty": "^11.2.1"
-  },
-  "devDependencies": {}
+  }
 }
