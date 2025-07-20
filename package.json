@@ -5,8 +5,7 @@
   "main": "src/index.js",
   "type": "module",
   "exports": {
-    ".": "./src/index.js",
-    "./utils/Logger": "./src/utils/Logger.js"
+    ".": "./src/index.js"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

@@ -5,7 +5,7 @@ import { ManifoldMemory } from './core/ManifoldMemory.js';
 import { ManifoldNavigator } from './core/ManifoldNavigator.js';
 import { MultimodalSynthesizer } from './core/MultimodalSynthesizer.js';
 import { AIProviderBridge } from './core/AIProviderBridge.js'; // Impor untuk shutdown
-import { Logger } from './utils/Logger.js';
+import { Logger as NexusLogger } from './utils/Logger.js'; // Impor Logger untuk diekspor kembali
 
 /**
  * MetacognitiveNexus adalah Core dari sebuah entitas AI, mengelola siklus hidup,
@@ -181,4 +181,4 @@ export class MetacognitiveNexus {
 }
 
 // Ekspor utilitas inti jika diperlukan oleh aplikasi host
-export { Logger };
+export const Logger = NexusLogger;
