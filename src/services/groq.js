@@ -1,5 +1,4 @@
 // File: metacognitive-nexus/src/services/groq.js
-// (Tidak ada perubahan pada file groq.js)
 import Groq from 'groq-sdk';
 import { Logger } from '../utils/Logger.js';
 
@@ -13,24 +12,48 @@ export class GroqAdapter {
         }
         this.#client = new Groq({ apiKey });
         this.#model = model;
-        Logger.info(`[GroqAdapter] Groq client diinisialisasi dengan model: ${this.#model}`);
     }
 
-    async generateText(prompt) {
+    /**
+     * Memproses muatan interaksi, dioptimalkan untuk respons chat berkecepatan tinggi.
+     * @param {object} payload - Obyek interaksi terpadu.
+     * @returns {Promise<object>} Obyek hasil yang kaya.
+     */
+    async process(payload) {
+        const { messages, stream = false } = payload;
+        const requestBody = {
+            model: this.#model,
+            messages: messages,
+            stream: stream,
+        };
+
         try {
-            const response = await this.#client.chat.completions.create({
-                messages: [{ role: 'user', content: prompt }],
-                model: this.#model,
-            });
-            return response.choices[0]?.message?.content || '';
-        } catch (error) {
-            Logger.error(`[GroqAdapter] Error saat generate text: ${error.message}`, error);
-            if (error.message.includes('rate limit exceeded')) {
-                throw new Error('RATE_LIMIT_EXCEEDED');
-            } else if (error.message.includes('authentication failed')) {
-                throw new Error('INVALID_API_KEY');
+            if (stream) {
+                const streamResponse = await this.#client.chat.completions.create(requestBody);
+                Logger.debug(`[GroqAdapter] Streaming dimulai untuk model ${this.#model}.`);
+                return { stream: streamResponse, type: 'STREAM' };
             }
-            throw error;
+            
+            const response = await this.#client.chat.completions.create(requestBody);
+            const choice = response.choices[0];
+
+            return {
+                content: choice.message.content,
+                tool_calls: null, // Groq saat ini tidak fokus pada tool use
+                finish_reason: choice.finish_reason,
+                usage: response.usage
+            };
+        } catch (error) {
+            Logger.error(`[GroqAdapter] Error saat memproses: ${error.message}`, error);
+            this.#handleError(error);
         }
+    }
+
+    #handleError(error) {
+        if (error instanceof Groq.APIError) {
+            if (error.status === 429) throw new Error('RATE_LIMIT_EXCEEDED');
+            if (error.status === 401 || error.status === 403) throw new Error('INVALID_API_KEY');
+        }
+        throw error;
     }
 }

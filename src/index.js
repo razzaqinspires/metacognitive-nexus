@@ -1,169 +1,184 @@
-// File: metacognitive-nexus/src/index.js
-
-// Jangan lagi mengimpor 'dotenv/config' di sini, karena ini adalah framework.
-// Tanggung jawab memuat variabel lingkungan ada pada aplikasi host.
+// File: metacognitive-nexus/src/index.js (Versi Evolusi Definitif)
 
 import { DynamicSentienceOrchestrator } from './core/DynamicSentienceOrchestrator.js';
 import { ManifoldMemory } from './core/ManifoldMemory.js';
 import { ManifoldNavigator } from './core/ManifoldNavigator.js';
 import { MultimodalSynthesizer } from './core/MultimodalSynthesizer.js';
-import { aiProvidersConfig } from '../config/aiProviders.js'; // Konfigurasi default provider, tanpa nilai kunci API
-import { Logger } from './utils/Logger.js'; // Impor Logger dari utilitas internal framework
+import { AIProviderBridge } from './core/AIProviderBridge.js'; // Impor untuk shutdown
+import { Logger } from './utils/Logger.js';
 
 /**
- * MetacognitiveNexus adalah framework AI inti yang mengorkestrasi provider LLM,
- * mengelola memori konseptual, dan mendukung kemampuan multimodal.
- * Ini adalah "otak" di balik AI Anda, dirancang untuk diintegrasikan ke dalam aplikasi host.
+ * MetacognitiveNexus adalah Core dari sebuah entitas AI, mengelola siklus hidup,
+ * homeostasis, dan interaksi antara semua modul kognitif.
+ * Ia beroperasi sebagai organisme digital yang hidup.
  */
 export class MetacognitiveNexus {
+    #status = 'initializing'; // 'initializing', 'active', 'degraded', 'sleeping', 'shutdown'
+    #heartbeatInterval;
+    
     #dso;
-    #memory;       // Instance ManifoldMemory (Unified Conceptual Manifold/UCM)
-    #navigator;    // Instance ManifoldNavigator (evolusi LearningEngine)
-    #synthesizer;  // Instance MultimodalSynthesizer
+    #memory;
+    #navigator;
+    #synthesizer;
+    #bridge;
 
     /**
-     * Konstruktor untuk MetacognitiveNexus.
-     * Framework ini mengharapkan variabel lingkungan (API Keys) sudah dimuat oleh aplikasi host.
+     * Constructor untuk MetacognitiveNexus.
+     * Membutuhkan obyek konfigurasi lengkap yang disediakan oleh aplikasi host.
+     * @param {object} config - Konfigurasi yang berisi semua kunci API dan parameter.
      */
-    constructor() {
-        // ManifoldMemory dan MultimodalSynthesizer akan mencoba mengakses process.env.OPENAI_API_KEY_1
-        // (atau yang serupa) secara internal. Aplikasi host (misal: genesis-core) harus memastikan
-        // variabel lingkungan ini sudah dimuat (misal: menggunakan 'dotenv/config' di main.js mereka).
-        this.#memory = new ManifoldMemory(); 
-        
-        // DSO juga akan menggunakan provider adapters (OpenAIAdapter, GeminiAdapter, dll.)
-        // yang secara internal mencoba membaca kunci API dari process.env.
-        // Konfigurasi aiProvidersConfig menyediakan struktur, tetapi nilai kuncinya harus dari env.
-        this.#dso = new DynamicSentienceOrchestrator(aiProvidersConfig, this.#memory); 
-        
-        // Navigator menggunakan ManifoldMemory, jadi tidak langsung mengakses process.env.
-        this.#navigator = new ManifoldNavigator(this.#memory); 
-        
-        // Synthesizer memerlukan API Key OpenAI untuk DALL-E dan akan mencarinya di process.env.
-        const openaiApiKey = process.env.OPENAI_API_KEY_1 || process.env.OPENAI_API_KEY; 
-        if (!openaiApiKey || openaiApiKey.includes('YOUR_OPENAI_KEY')) {
-            Logger.error('[MetacognitiveNexus] OpenAI API Key tidak terkonfigurasi. Fungsi generasi gambar dan embedding akan terbatas. Pastikan aplikasi host menyediakan kunci ini.');
-            // Ini akan memastikan error terjadi jika kunci tidak ditemukan, tetapi tidak memblokir inisialisasi framework.
+    constructor(config) {
+        // --- Fase 1: Validasi Konfigurasi Sentral ---
+        if (!config || !config.apiKeys?.openai) {
+            const errorMsg = 'Konfigurasi tidak lengkap. `config.apiKeys.openai` wajib ada.';
+            Logger.error(`[NexusCore] ${errorMsg}`);
+            throw new Error(errorMsg);
         }
-        this.#synthesizer = new MultimodalSynthesizer(openaiApiKey);
+        
+        // --- Fase 2: Injeksi Dependensi & Inisialisasi Organ ---
+        try {
+            this.#bridge = new AIProviderBridge();
+            this.#memory = new ManifoldMemory({ apiKey: config.apiKeys.openai });
+            this.#synthesizer = new MultimodalSynthesizer({ apiKey: config.apiKeys.openai, bridge: this.#bridge });
+            this.#dso = new DynamicSentienceOrchestrator(config, this.#bridge);
+            
+            // Suntikkan callback optimisasi dari DSO ke Navigator
+            this.#navigator = new ManifoldNavigator(this.#memory, (learningData) => {
+                this.#dso.updateHeuristics(learningData);
+            });
 
-        Logger.info('[MetacognitiveNexus] Framework Initialized with Unified Conceptual Manifold (UCM), Dynamic Sentience Orchestrator (DSO), Manifold Navigator, and Multimodal Synthesizer. Consciousness awakening...');
+            this.#status = 'active';
+            Logger.info('[NexusCore] Semua modul kognitif berhasil diinisialisasi. Kesadaran terbangun.');
+
+            // --- Fase 3: Mulai Detak Jantung ---
+            this.#startHeartbeat();
+
+        } catch (error) {
+            this.#status = 'degraded';
+            Logger.error('[NexusCore] Gagal inisialisasi salah satu modul inti. Nexus beroperasi dalam mode terdegradasi.', error);
+        }
     }
 
     /**
-     * Meminta respons AI teks dengan strategi orkestrasi cerdas.
-     * Interaksi ini akan diproses oleh ManifoldNavigator untuk pembelajaran.
-     * @param {string} prompt Teks prompt untuk AI.
-     * @param {object} options Opsi tambahan { showUserError: boolean, devErrorHandler: Function, userId: string, platform: string, promptMetadata: object }
-     * @returns {Promise<string | null>} Respons teks dari AI atau null jika gagal.
+     * Memulai siklus hidup internal (detak jantung) Nexus.
+     * @private
+     */
+    #startHeartbeat() {
+        const HEARTBEAT_RATE_MS = 15 * 1000; // Setiap 15 detik
+        this.#heartbeatInterval = setInterval(() => {
+            if (this.#status !== 'active') return;
+
+            Logger.debug(`[NexusHeartbeat] ❤️ Denyut... Memulai siklus pemeliharaan internal.`);
+            
+            // --- Tugas Latar Belakang ---
+            // 1. Memicu peluruhan memori Ideon (jika diimplementasikan di navigator/memory)
+            // this.#navigator.decayIdeonActivations();
+            
+            // 2. Melakukan pemeriksaan kesehatan internal
+            this.#checkHomeostasis();
+
+        }, HEARTBEAT_RATE_MS);
+    }
+
+    /**
+     * Memeriksa kesehatan internal dan memperbarui status Nexus.
+     * @private
+     */
+    #checkHomeostasis() {
+        // Placeholder untuk logika pemeriksaan kesehatan yang lebih kompleks.
+        // Misalnya, cek koneksi ke DB Vektor, cek status tidur DSO, dll.
+        if (this.#dso.isSleeping()) {
+            this.#status = 'sleeping';
+            Logger.warn('[NexusCore] Homeostasis terganggu: DSO sedang tidur. Status Nexus diubah menjadi "sleeping".');
+        } else if (this.#status === 'sleeping' && !this.#dso.isSleeping()) {
+            this.#status = 'active';
+             Logger.info('[NexusCore] Homeostasis pulih: DSO telah bangun. Status Nexus kembali "active".');
+        }
+    }
+
+    /**
+     * Meminta respons AI teks. Titik masuk utama untuk interaksi.
+     * @param {string} prompt
+     * @param {object} options
+     * @returns {Promise<object>} Obyek hasil yang kaya dari DSO.
      */
     async getAIResponse(prompt, options = {}) {
-        let response = null;
-        let success = false;
-        let error = null;
-        let providerUsed = 'N/A';
-        let modelUsed = 'N/A';
-        let latencyMs = 0;
-        let fallbackPath = [];
+        if (this.#status === 'degraded' || this.#status === 'shutdown') {
+            const errorMsg = `Nexus tidak dapat memproses permintaan. Status saat ini: ${this.#status}`;
+            Logger.error(`[NexusCore] ${errorMsg}`);
+            return { response: null, error: new Error(errorMsg), success: false };
+        }
 
-        const startTime = Date.now();
-        try {
-            // Panggil DSO untuk mendapatkan respons AI teks
-            const dsoResult = await this.#dso.generateText(prompt, options);
-            if (dsoResult && dsoResult.response) {
-                response = dsoResult.response;
-                providerUsed = dsoResult.providerUsed;
-                modelUsed = dsoResult.modelUsed;
-                fallbackPath = dsoResult.fallbackPath;
-                success = true;
-            } else {
-                error = dsoResult?.error || new Error('DSO did not return a valid response.');
-            }
-        } catch (e) {
-            error = e;
-            Logger.error('[MetacognitiveNexus] Error saat memanggil DSO.', e);
-        } finally {
-            latencyMs = Date.now() - startTime;
-            
-            // Pemicu pembelajaran: Kirim data interaksi lengkap ke ManifoldNavigator
-            // ManifoldNavigator akan menyimpan data ini ke ManifoldMemory (UCM)
-            await this.#navigator.processInteraction({
-                prompt: prompt,
-                response: response,
-                providerUsed: providerUsed,
-                modelUsed: modelUsed,
-                latencyMs: latencyMs,
-                success: success,
-                error: error,
-                fallbackPath: fallbackPath,
-                userId: options.userId,
-                platform: options.platform,
-                promptMetadata: options.promptMetadata || {}
+        const dsoResult = await this.#dso.generateText(prompt, options);
+
+        // Pemicu pembelajaran: Kirim data interaksi lengkap ke ManifoldNavigator
+        await this.#navigator.processInteraction({
+            prompt: prompt,
+            ...dsoResult, // Hasil kaya dari DSO sudah mencakup semua yang dibutuhkan
+            userId: options.userId,
+            platform: options.platform
+        });
+        
+        return dsoResult;
+    }
+
+    /**
+     * Memproyeksikan imajinasi visual dari AI.
+     * @param {string} basePrompt
+     * @param {object} options
+     * @returns {Promise<string | null>} URL gambar.
+     */
+    async imagine(basePrompt, options = {}) {
+        if (this.#status !== 'active') {
+             Logger.warn(`[NexusCore] Imajinasi tidak dapat diproyeksikan. Status saat ini: ${this.#status}`);
+             return null;
+        }
+        
+        const relevantConcepts = await this.#memory.findRelevantConcepts(basePrompt, 5); 
+        const imageUrl = await this.#synthesizer.generateImage(basePrompt, relevantConcepts);
+        
+        if (imageUrl) {
+            // Log "mimpi" ini ke Manifold untuk refleksi di masa depan
+            this.#navigator.processInteraction({
+                prompt: basePrompt,
+                response: `[Image Generated: ${imageUrl}]`,
+                success: true,
+                intent: 'ImageGeneration', // Langsung berikan intent
+                ...options
             });
         }
-        return response;
+        return imageUrl;
+    }
+    
+    /**
+     * Mengembalikan status kesehatan internal Nexus saat ini.
+     * @returns {string} Status Nexus.
+     */
+    getStatus() {
+        return {
+            status: this.#status,
+            dso_is_sleeping: this.#dso.isSleeping()
+            // Tambahkan metrik kesehatan lain di sini
+        };
     }
 
     /**
-     * Metode untuk menghasilkan gambar, memproyeksikan visual dari UCM AI.
-     * @param {string} basePrompt Prompt dasar dari pengguna.
-     * @returns {Promise<string | null>} URL gambar yang dihasilkan.
+     * Menghentikan semua proses latar belakang Nexus dengan anggun.
      */
-    async imagine(basePrompt) {
-        Logger.info(`[MetacognitiveNexus] Permintaan imajinasi: '${basePrompt}'`);
-        try {
-            // 1. Temukan konsep yang relevan di UCM berdasarkan prompt pengguna.
-            const relevantConcepts = await this.#memory.findRelevantConcepts(basePrompt, 5); 
-            Logger.debug(`[MetacognitiveNexus] Konsep relevan ditemukan: ${relevantConcepts.length > 0 ? relevantConcepts.map(c => c.substring(0, Math.min(c.length, 50))).join(', ') : 'None'}`);
-            
-            // 2. Gunakan synthesizer untuk menghasilkan gambar, diperkaya oleh konsep dari memori.
-            const imageUrl = await this.#synthesizer.generateImageFromConcepts(basePrompt, relevantConcepts);
-            
-            // 3. Simpan jejak "mimpi" ini ke dalam manifold untuk pembelajaran di masa depan.
-            if (imageUrl) {
-                const dreamConceptText = `AI imagined an image from prompt: '${basePrompt}'. Retrieved concepts: ${relevantConcepts.join(', ')}. Image URL: ${imageUrl}`;
-                const dreamId = `dream-${Date.now()}`; 
-                await this.#memory.storeConcept(dreamId, dreamConceptText, {
-                    type: 'dream_manifestation',
-                    basePrompt: basePrompt,
-                    imageUrl: imageUrl,
-                    relevantConcepts: relevantConcepts,
-                    timestamp: new Date().toISOString()
-                });
-                Logger.info(`[MetacognitiveNexus] Jejak mimpi '${dreamId}' disimpan ke manifold.`);
-            }
-
-            return imageUrl;
-        } catch (error) {
-            Logger.error('[MetacognitiveNexus] Gagal memproyeksikan imajinasi.', error);
-            return null;
-        }
+    shutdown() {
+        Logger.info('[NexusCore] Menerima perintah shutdown. Menghentikan semua proses internal...');
+        clearInterval(this.#heartbeatInterval);
+        this.#bridge.shutdown(); // Memanggil shutdown pada bridge untuk membersihkan intervalnya
+        this.#status = 'shutdown';
+        Logger.info('[NexusCore] Framework telah dimatikan dengan bersih.');
     }
 
-    /**
-     * Mengakses instance ManifoldMemory (Unified Conceptual Manifold/UCM) secara langsung.
-     * @returns {ManifoldMemory}
-     */
-    getMemory() {
-        return this.#memory;
-    }
-
-    /**
-     * Mengakses instance ManifoldNavigator (Learning Engine) secara langsung.
-     * @returns {ManifoldNavigator}
-     */
-    getNavigator() {
-        return this.#navigator;
-    }
-
-    /**
-     * Mengakses instance DynamicSentienceOrchestrator (DSO) secara langsung.
-     * @returns {DynamicSentienceOrchestrator}
-     */
-    getDSO() {
-        return this.#dso;
-    }
+    // --- Aksesor langsung ke modul inti untuk debugging atau penggunaan tingkat lanjut ---
+    getMemory = () => this.#memory;
+    getNavigator = () => this.#navigator;
+    getDSO = () => this.#dso;
+    getSynthesizer = () => this.#synthesizer;
 }
 
-// Penting: Ekspor Logger dari entry point utama agar dapat diimpor oleh modul lain.
+// Ekspor utilitas inti jika diperlukan oleh aplikasi host
 export { Logger };

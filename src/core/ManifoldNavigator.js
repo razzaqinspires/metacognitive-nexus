@@ -1,80 +1,100 @@
-// File: metacognitive-nexus/src/core/ManifoldNavigator.js
+// File: metacognitive-nexus/src/core/ManifoldNavigator.js (Versi Evolusi)
 import { Logger } from '../utils/Logger.js';
-import { ManifoldMemory } from './ManifoldMemory.js'; // Menggunakan ManifoldMemory
-import { generateInteractionId } from '../models/InteractionLogSchema.js'; // Untuk ID interaksi
-// Impor skema jika diperlukan untuk validasi atau struktur data
-// import { ConceptSchema } from '../models/ConceptSchema.js'; 
-// import { InteractionLogSchema } from '../models/InteractionLogSchema.js';
+import { ManifoldMemory } from './ManifoldMemory.js';
+import { generateInteractionId } from '../models/InteractionLogSchema.js';
 
 export class ManifoldNavigator {
-    #memory; // Instance ManifoldMemory
+    #memory;
     #logger;
+    #dsoOptimizerCallback; // Callback untuk memicu optimisasi DSO
 
-    /**
-     * @param {ManifoldMemory} manifoldMemoryInstance Instance dari ManifoldMemory.
-     */
-    constructor(manifoldMemoryInstance) {
+    constructor(manifoldMemoryInstance, dsoOptimizerCallback = null) {
         this.#memory = manifoldMemoryInstance;
         this.#logger = Logger;
-        this.#logger.info('[ManifoldNavigator] Conceptual Navigation System online.');
+        this.#dsoOptimizerCallback = dsoOptimizerCallback;
+        this.#logger.info('[ManifoldNavigator] Semiotic & Strategy Core online.');
     }
 
     /**
-     * Memproses sebuah interaksi AI untuk pembelajaran ke Manifold.
-     * Ini adalah bagaimana AI "mempelajari" dan "memetakan" realitas.
-     * @param {object} rawInteractionData Data mentah interaksi (prompt, response, providerUsed, latencyMs, success, error, etc.)
-     * @returns {Promise<void>}
+     * Mengklasifikasikan niat dari prompt pengguna.
+     * (Implementasi sederhana untuk demonstrasi; bisa diganti model klasifikasi yang lebih canggih)
+     * @private
+     */
+    #classifyIntent(prompt) {
+        const p = prompt.toLowerCase();
+        if (p.startsWith('/imagine') || p.includes('buatkan gambar')) return 'ImageGeneration';
+        if (p.match(/\b(apa|siapa|kapan|mengapa|bagaimana|jelaskan)\b/)) return 'QuestionAnswering';
+        if (p.match(/\b(buatkan|tuliskan kode|convert|refactor)\b/)) return 'CodeGeneration';
+        if (p.match(/\b(aku merasa|sedih|senang|marah)\b/)) return 'PersonalVent';
+        if (p.match(/\b(buatkan cerita|puisi|ide)\b/)) return 'CreativeRequest';
+        return 'ChitChat';
+    }
+
+    /**
+     * Memproses, membedah, dan menenun interaksi AI ke dalam Manifold.
+     * @param {object} rawInteractionData Data mentah interaksi.
      */
     async processInteraction(rawInteractionData) {
         const interactionId = generateInteractionId();
-        
-        // Buat representasi teks dari konsep interaksi untuk embedding
-        // Ini adalah esensi konseptual yang akan di-embed ke manifold.
-        const conceptText = `User prompt: '${rawInteractionData.prompt}' ` +
-                            `AI response: '${rawInteractionData.response}'. ` +
-                            `Provider: ${rawInteractionData.providerUsed}, Model: ${rawInteractionData.modelUsed}. ` +
-                            `Latency: ${rawInteractionData.latencyMs}ms. Success: ${rawInteractionData.success}. ` +
-                            `Error: ${rawInteractionData.error?.message || 'None'}. ` +
-                            `User ID: ${rawInteractionData.userId || 'anonymous'}. ` +
-                            `Platform: ${rawInteractionData.platform || 'unknown'}.`;
+        const intent = this.#classifyIntent(rawInteractionData.prompt);
 
-        const metadata = {
-            id: interactionId,
+        // 1. Dekomposisi Konseptual
+        const promptId = `prompt-${interactionId}`;
+        const responseId = `response-${interactionId}`;
+
+        const baseMetadata = {
+            interactionId: interactionId,
             timestamp: new Date().toISOString(),
             userId: rawInteractionData.userId || 'anonymous',
             platform: rawInteractionData.platform || 'unknown',
-            providerUsed: rawInteractionData.providerUsed || 'unknown',
-            modelUsed: rawInteractionData.modelUsed || 'unknown',
-            latencyMs: rawInteractionData.latencyMs || 0,
-            success: rawInteractionData.success || false,
-            errorMessage: rawInteractionData.error?.message || '',
-            fallbackPath: rawInteractionData.fallbackPath || [],
-            prompt: rawInteractionData.prompt, // Simpan prompt penuh di metadata
-            response: rawInteractionData.response // Simpan respons penuh di metadata
+            providerUsed: rawInteractionData.providerUsed,
+            modelUsed: rawInteractionData.modelUsed,
+            latencyMs: rawInteractionData.latencyMs,
+            success: rawInteractionData.success,
+            intent: intent
         };
 
-        this.#logger.debug(`[ManifoldNavigator] Storing interaction ${interactionId} in UCM.`);
-        await this.#memory.storeConcept(interactionId, conceptText, metadata);
+        // 2. Penenunan Semantik: Simpan komponen sebagai konsep terpisah namun terhubung
+        // Embed prompt pengguna
+        await this.#memory.storeConcept(promptId, rawInteractionData.prompt, {
+            ...baseMetadata,
+            type: 'user_prompt',
+            responseId: responseId
+        });
 
-        // Di masa depan, di sini LearningEngine akan:
-        // - Mengidentifikasi konsep baru dari 'conceptText' dan menyimpannya sebagai entri ConceptSchema.
-        // - Memperbarui bobot QLC di DSO berdasarkan performa yang diamati.
-        // - Mencari hubungan antar konsep (misal: "Apa topik yang sering dikaitkan dengan 'AI Consciousness'?")
-        // - Menganalisis sentimen dari respons atau prompt.
-        // - Memulai proses adaptasi DSO berdasarkan pola kegagalan atau keberhasilan.
+        // Embed respons AI (jika ada)
+        if (rawInteractionData.response) {
+            await this.#memory.storeConcept(responseId, rawInteractionData.response, {
+                ...baseMetadata,
+                type: 'ai_response',
+                promptId: promptId
+            });
+        }
+        
+        this.#logger.info(`[ManifoldNavigator] Interaksi ${interactionId} (Intent: ${intent}) telah ditenun ke dalam UCM.`);
 
-        this.#logger.info(`[ManifoldNavigator] Interaksi ${interactionId} telah diproses dan dipetakan ke manifold.`);
-
-        // (Placeholder) Sinkronisasi ke Cognitive Repository (website) jika diperlukan
-        // await this.#memory.syncToCognitiveRepository({ interactionId: interactionId, type: 'interaction_log' });
+        // 3. Penyesuaian Heuristik Aktif
+        this.#triggerHeuristicAdjustment({
+            intent: intent,
+            success: rawInteractionData.success,
+            latency: rawInteractionData.latencyMs,
+            provider: rawInteractionData.providerUsed,
+            model: rawInteractionData.modelUsed
+        });
     }
 
-    // Metode untuk memicu optimasi DSO berdasarkan pembelajaran dari manifold
-    async triggerDSOOptimization() {
-        this.#logger.warn('[ManifoldNavigator] Optimasi DSO berbasis Manifold belum diimplementasikan. Akan menggunakan analisis pola dari UCM.');
-        // Contoh:
-        // const frequentFailures = await this.#memory.findConceptsByMetadata({ success: false, errorMessage: 'RATE_LIMIT_EXCEEDED' });
-        // Analisis frequentFailures untuk mengidentifikasi provider/model/key yang bermasalah
-        // Kemudian, instruksikan DSO untuk menyesuaikan bobot atau circuit breaker secara dinamis.
+    /**
+     * Memicu callback optimisasi untuk DSO dengan data pembelajaran.
+     * @private
+     */
+    #triggerHeuristicAdjustment(learningData) {
+        if (!this.#dsoOptimizerCallback) {
+            this.#logger.debug('[ManifoldNavigator] DSO optimizer callback not set. Skipping heuristic adjustment.');
+            return;
+        }
+
+        // Ini adalah "pulsa pembelajaran" yang dikirim ke sistem lain (misalnya, DSO atau modul optimisasi)
+        this.#logger.debug(`[ManifoldNavigator] Mengirim pulsa pembelajaran untuk intent '${learningData.intent}'.`);
+        this.#dsoOptimizerCallback(learningData);
     }
 }
