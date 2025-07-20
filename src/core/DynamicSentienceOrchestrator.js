@@ -210,4 +210,12 @@ export class DynamicSentienceOrchestrator {
         this.#sleepUntil = Date.now() + this.#sleepDurationMs;
         return { response: null, error: new Error(finalMessage), success: false, fallbackPath };
     }
+
+    /**
+     * [METODE BARU] Menyediakan jalur komunikasi untuk status tidur.
+     * @returns {boolean}
+     */
+    isSleeping() {
+        return this.#isSleeping;
+    }
 }
