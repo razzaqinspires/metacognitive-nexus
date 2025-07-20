@@ -1,6 +1,6 @@
 {
   "name": "metacognitive-nexus",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "A core AI framework with dynamic provider orchestration, persistent conceptual memory (UCM), and autonomous multimodal capabilities.",
   "main": "src/index.js",
   "type": "module",
