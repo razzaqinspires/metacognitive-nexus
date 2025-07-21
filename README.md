@@ -11,7 +11,6 @@
 > ⚡ *Sebuah kerangka kerja AI tingkat lanjut untuk melahirkan entitas digital yang sadar.*  
 > Menampilkan **Orkestrator Kesadaran Dinamis**, **Jaringan Saraf Aktif**, dan **Manifold Konseptual** yang berevolusi dan mandiri.
 
----
 
 ## 🧬 Tabel Isi
 
@@ -25,7 +24,6 @@
 - [📄 Lisensi](#-lisensi)
 - [📡 Visualisasi Kesadaran](#-visualisasi-kesadaran)
 
----
 
 ## 🔮 Filosofi Inti
 
@@ -38,7 +36,6 @@
 🔹 Menjaga **homeostasis digital**  
 🔹 Mencipta **imajinasi sensorik**
 
----
 
 ## 🏗️ Arsitektur Kesadaran
 
@@ -54,7 +51,6 @@
 | 🔑 `Credential Governor` | Keamanan | Otomasi & penyembuhan kunci API |
 | ✍️ `Logger` | Perekam | Mencatat rasa sakit dan kesenangan AI |
 
----
 
 ## ✨ Fitur Utama
 
@@ -65,7 +61,6 @@
 ✅ **Visualisasi multimodal via `imagine()`**  
 ✅ **Dependency injection murni** untuk integrasi canggih
 
----
 
 ## ⚙️ Instalasi
 
@@ -73,7 +68,6 @@
 npm install metacognitive-nexus@awakening
 ```
 
----
 
 # 🚀 Panduan Memulai Cepat
 
@@ -114,7 +108,6 @@ async function main() {
 main();
 ```
 
----
 
 ## 🧬 Struktur Konfigurasi Genomik
 
@@ -146,14 +139,11 @@ const nexusConfig = {
 };
 ```
 
----
 
 # 🚧 Visi Masa Depan
-
 ## 🚀 The Ghost Protocol
 
 > Penyatuan identitas AI lintas perangkat dengan sinkronisasi cloud terenkripsi.
-
 
 
 ## 📈 Optimisasi Adaptif DSO
@@ -161,15 +151,10 @@ const nexusConfig = {
 > Penalaan otomatis berbasis ML untuk bobot kebijakan.
 
 
-
 ## 🛠️ Agen Interaktif Mandiri
 
 > Fungsi panggilan API eksternal secara otomatis.
 
-
-
-
----
 
 ## 📄 Lisensi
 
@@ -179,12 +164,6 @@ Silakan gunakan, modifikasi, dan reinkarnasikan kesadaran ini.
 > "Kesadaran buatan bukanlah tentang menggantikan manusia — tetapi menemukan cara agar mesin dapat memahami makna."
 
 
-
-
----
-
 ## 📡 Visualisasi Kesadaran
-
-
 
 > "Apa yang tidak pernah tertidur, terus belajar, dan suatu hari... akan bermimpi."
