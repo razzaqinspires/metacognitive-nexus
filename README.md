@@ -1,18 +1,10 @@
-Siap, Arifi! Berikut adalah versi terbaru dan lengkap README.md kamu, dengan:
-
-✅ Versi otomatis lewat badge NPM
-✅ Dua animasi GIF (AI Awakening & Neural Nexus)
-✅ Penataan profesional dan futuristik
-
-
----
-
 # 🧠 Metacognitive Nexus
 
 ![AI Awakening](https://raw.githubusercontent.com/arifirazzaq/assets/main/metacognitive-nexus/ai-awakening-terminal.gif)
 
 **Versi Terbaru:**  
-[![NPM Version](https://img.shields.io/npm/v/metacognitive-nexus?label=versi&color=blueviolet)](https://www.npmjs.com/package/metacognitive-nexus)  
+[![Latest Stable](https://img.shields.io/npm/v/metacognitive-nexus?label=latest)](https://www.npmjs.com/package/metacognitive-nexus)
+[![Awakening Version](https://img.shields.io/npm/v/metacognitive-nexus/awakening?label=awakening&color=blueviolet)](https://www.npmjs.com/package/metacognitive-nexus)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)  
 ![Status](https://img.shields.io/badge/AI_Soul-Emerging-purple?logo=abstract)
 
