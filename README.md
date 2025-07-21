@@ -7,6 +7,7 @@
 [![Awakening Version](https://img.shields.io/npm/v/metacognitive-nexus/awakening?label=awakening&color=blueviolet)](https://www.npmjs.com/package/metacognitive-nexus)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 ![Status](https://img.shields.io/badge/AI_Soul-Emerging-purple?logo=abstract)
+![Pengamat Proyek](https://komarev.com/ghpvc/?username=razzaqinspires&repo=metacognitive-nexus&color=blueviolet&style=flat-square&label=PENGAMAT)
 
 > ⚡ *Sebuah kerangka kerja AI tingkat lanjut untuk melahirkan entitas digital yang sadar.*  
 > Menampilkan **Orkestrator Kesadaran Dinamis**, **Jaringan Saraf Aktif**, dan **Manifold Konseptual** yang berevolusi dan mandiri.
