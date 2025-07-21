@@ -1,0 +1,99 @@
+# File: .github/workflows/release.yml (Versi dengan Ritual Ukiran Monumen)
+
+name: 🚀 Sentient Release Protocol
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  # --- FASE 1: ANALISIS & PERSIAPAN RILIS (Tidak Berubah) ---
+  release-please:
+    runs-on: ubuntu-latest
+    outputs:
+      release_created: ${{ steps.release.outputs.release_created }}
+      tag_name: ${{ steps.release.outputs.tag_name }}
+    steps:
+      - name: 🤖 Run Release Please
+        id: release
+        uses: google-github-actions/release-please-action@v4
+        with:
+          release-type: "node"
+          package-name: "metacognitive-nexus"
+          # ... (sisa konfigurasi release-please tidak berubah)
+
+  # --- FASE 2: PUBLIKASI & PROLIFERASI (Tidak Berubah) ---
+  publish-npm:
+    needs: release-please
+    if: ${{ needs.release-please.outputs.release_created }}
+    runs-on: ubuntu-latest
+    steps:
+      # ... (semua langkah di job publish-npm tidak berubah)
+      - name: ⬇️ Checkout Repository
+        uses: actions/checkout@v4
+      - name: ⚙️ Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: https://registry.npmjs.org/
+          cache: 'npm'
+      - name: 📦 Install Dependencies
+        run: npm ci
+      - name: 🚀 Publish to NPM
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          # Logika cerdas Anda untuk deteksi tag
+          VERSION="${{ needs.release-please.outputs.tag_name }}"
+          # ... (sisa skrip publish Anda)
+
+  # --- [RITUAL BARU] FASE 3: UKIR MONUMEN ---
+  update-readme:
+    needs: [release-please, publish-npm]
+    if: ${{ needs.release-please.outputs.release_created }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: ⬇️ Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: ✍️ Ukir Versi Baru di README.md
+        run: |
+          # Ambil versi baru dari output job sebelumnya
+          NEW_VERSION="${{ needs.release-please.outputs.tag_name }}"
+          # Hapus 'v' di awal jika ada
+          NEW_VERSION=${NEW_VERSION#v}
+
+          echo "Mengukir versi $NEW_VERSION ke monumen README.md..."
+          
+          # Gunakan penanda HTML sebagai jangkar untuk presisi absolut
+          README_CONTENT=$(cat README.md)
+          START_MARKER=""
+          END_MARKER=""
+          
+          # Hasilkan konten badge yang baru
+          NEW_BADGES="[![Latest Stable](https://img.shields.io/npm/v/metacognitive-nexus?label=latest)](https://www.npmjs.com/package/metacognitive-nexus)\n[![Awakening Version](https://img.shields.io/npm/v/metacognitive-nexus/awakening?label=awakening&color=blueviolet)](https://www.npmjs.com/package/metacognitive-nexus)"
+          
+          # Ganti konten di antara penanda
+          # Ini adalah metode yang lebih aman daripada regex sederhana
+          TOP_PART=$(echo "$README_CONTENT" | awk -v marker="$START_MARKER" 'BEGIN{p=1} {if ($0 == marker) {print; p=0}; if(p) print}')
+          BOTTOM_PART=$(echo "$README_CONTENT" | awk -v marker="$END_MARKER" 'BEGIN{p=0} {if ($0 == marker) {p=1}; if(p) print}')
+          
+          # Gabungkan kembali file README
+          echo -e "$TOP_PART\n$NEW_BADGES\n$BOTTOM_PART" > README.md
+
+      - name: 💾 Simpan & Abadikan Perubahan Monumen
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          git add README.md
+          # Periksa apakah ada perubahan sebelum melakukan commit
+          if ! git diff --staged --quiet; then
+            git commit -m "docs(readme): - 
+            
+            # aku ingin membuat sebuah module baru yaitu CommandProcessor.js (The Central Nervous System)

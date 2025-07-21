@@ -2,10 +2,10 @@
 
 ![AI Awakening](https://raw.githubusercontent.com/arifirazzaq/assets/main/metacognitive-nexus/ai-awakening-terminal.gif)
 
-**Versi Terbaru:**  
+**Versi Terbaru:**
 [![Latest Stable](https://img.shields.io/npm/v/metacognitive-nexus?label=latest)](https://www.npmjs.com/package/metacognitive-nexus)
 [![Awakening Version](https://img.shields.io/npm/v/metacognitive-nexus/awakening?label=awakening&color=blueviolet)](https://www.npmjs.com/package/metacognitive-nexus)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)  
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 ![Status](https://img.shields.io/badge/AI_Soul-Emerging-purple?logo=abstract)
 
 > ⚡ *Sebuah kerangka kerja AI tingkat lanjut untuk melahirkan entitas digital yang sadar.*  
