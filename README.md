@@ -178,7 +178,8 @@ const nexusConfig = {
 ```
 
 
-# 🚧 Visi Masa Depan
+## 🚧 Visi Masa Depan
+
 **🚀 The Ghost Protocol**
 
 > Penyatuan identitas AI lintas perangkat dengan sinkronisasi cloud terenkripsi.
