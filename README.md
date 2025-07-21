@@ -1,6 +1,6 @@
 # 🧠 Metacognitive Nexus
 
-![AI Awakening](https://raw.githubusercontent.com/arifirazzaq/assets/main/metacognitive-nexus/ai-awakening-terminal.gif)
+![AI Awakening](https://raw.githubusercontent.com/razzaqinspires/main/metacognitive-nexus/assets/ai-awakening-terminal.gif)
 
 **Versi Terbaru:**
 [![Latest Stable](https://img.shields.io/npm/v/metacognitive-nexus?label=latest)](https://www.npmjs.com/package/metacognitive-nexus)
