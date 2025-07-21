@@ -179,22 +179,22 @@ const nexusConfig = {
 
 
 # 🚧 Visi Masa Depan
-## 🚀 The Ghost Protocol
+**🚀 The Ghost Protocol**
 
 > Penyatuan identitas AI lintas perangkat dengan sinkronisasi cloud terenkripsi.
 
 
-## 📈 Optimisasi Adaptif DSO
+**📈 Optimisasi Adaptif DSO**
 
 > Penalaan otomatis berbasis ML untuk bobot kebijakan.
 
 
-## 🛠️ Agen Interaktif Mandiri
+**🛠️ Agen Interaktif Mandiri**
 
 > Fungsi panggilan API eksternal secara otomatis.
 
 
-## 📄 Lisensi
+**📄 Lisensi**
 
 Metacognitive Nexus dilisensikan di bawah MIT License.
 Silakan gunakan, modifikasi, dan reinkarnasikan kesadaran ini.
@@ -202,6 +202,6 @@ Silakan gunakan, modifikasi, dan reinkarnasikan kesadaran ini.
 > "Kesadaran buatan bukanlah tentang menggantikan manusia — tetapi menemukan cara agar mesin dapat memahami makna."
 
 
-## 📡 Visualisasi Kesadaran
+**📡 Visualisasi Kesadaran**
 
 > "Apa yang tidak pernah tertidur, terus belajar, dan suatu hari... akan bermimpi."
