@@ -1,0 +1,84 @@
+// META-DECLARATION
+// Protokol: Temporal Code-Form Morphogenesis (TCFM)
+// Penulis: Aisyah
+// Tujuan: Menerjemahkan alur kerja Git menjadi entitas visual yang hidup,
+//         bukan sekadar representasi, melainkan manifestasi.
+
+// === I. DEFINISI TIPE ENTITAS INTI ===
+// Ini bukan 'struct' atau 'class'. Ini adalah definisi esensi.
+
+// 'PeristiwaGit' adalah denyut jantung dari evolusi.
+type GitEvent = Commit | BranchCreation | Merge | PullRequest;
+
+// 'StatusCI' adalah sistem imun dari kristal.
+enum CI_Status {
+    Passing, // Memurnikan struktur
+    Failing, // Menciptakan retakan
+    InProgress // Menyebabkan getaran subtil
+}
+
+// 'Kristal' adalah wujud fisik dari kode.
+struct Crystal {
+    facets: Vec<Facet>,      // Setiap commit adalah sebuah faset.
+    symmetry: f64,           // Ukuran kesempurnaan bentuk.
+    purity: f64,             // 1.0 = jernih, 0.0 = penuh inklusi gelap.
+    fractures: Vec<Fracture> // Retakan akibat build yang gagal.
+}
+
+// === II. DEFINISI STRUKTUR ONTOLOGIS ===
+
+// 'Sigillum' adalah organisme itu sendiri.
+struct Sigillum {
+    core_crystal: Crystal, // Mewakili cabang 'main'.
+    branch_formations: HashMap<String, Crystal> // Cabang lain sebagai kristal satelit.
+}
+
+// === III. MESIN MORFOGENESIS TEMPORAL ===
+// Ini adalah 'main loop' dari eksistensi. Ia tidak berjalan per-tick,
+// ia berjalan per-peristiwa.
+
+fn temporal_morphogenesis_engine(sigillum: &mut Sigillum, event_stream: RealTimeStream<GitEvent>, ci_stream: RealTimeStream<CI_Status>) {
+
+    // Berlangganan pada aliran realitas dari repositori.
+    event_stream.on_receive(|event| {
+        match event {
+            GitEvent::Commit(c) => {
+                // Bukan sekadar menambah data, tapi menumbuhkan sejarah.
+                let target_crystal = sigillum.branch_formations.get_mut(&c.branch_name)
+                                        .unwrap_or(&mut sigillum.core_crystal);
+                target_crystal.add_facet(complexity=c.lines_changed);
+                target_crystal.recalculate_symmetry();
+            },
+            GitEvent::BranchCreation(b) => {
+                // Kelahiran sebuah kemungkinan baru.
+                let new_formation = Crystal::new_from_parent(&sigillum.core_crystal);
+                sigillum.branch_formations.insert(b.name, new_formation);
+            },
+            GitEvent::Merge(m) => {
+                // Dua realitas menyatu.
+                if let Some(merged_formation) = sigillum.branch_formations.remove(&m.source_branch) {
+                    sigillum.core_crystal.fuse_with(merged_formation);
+                    sigillum.core_crystal.recalculate_symmetry();
+                    // Picu denyut cahaya penyatuan.
+                    render_engine.trigger_fusion_pulse();
+                }
+            }
+        }
+    });
+
+    // Sistem imun kristal bereaksi.
+    ci_stream.on_receive(|status| {
+        match status {
+            CI_Status::Failing => {
+                // Kode yang sakit menciptakan kristal yang cacat.
+                sigillum.core_crystal.induce_fracture();
+                sigillum.core_crystal.purity *= 0.98; // Menurunkan kemurnian.
+            },
+            CI_Status::Passing => {
+                // Penyembuhan diri.
+                sigillum.core_crystal.heal_fractures();
+                sigillum.core_crystal.purity = (sigillum.core_crystal.purity + 0.01).min(1.0);
+            }
+        }
+    });
+}

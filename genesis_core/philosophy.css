@@ -1,0 +1,42 @@
+/* File: metacognitive-nexus/philosophy.css */
+/* Tujuan: Menetapkan hukum fisika visual untuk wadah realitas. */
+
+#reality-container {
+    position: relative;
+    width: 100%;
+    max-width: 800px; /* Batas agar tidak terlalu lebar di layar besar */
+    height: 400px;
+    margin: 20px auto; /* Pusatkan portal */
+    background: #010409; /* Warna kekosongan kuantum */
+    border: 1px solid #21262d; /* Batas realitas */
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 0 30px rgba(88, 166, 255, 0.2); /* Aura dari energi di dalamnya */
+}
+
+#ontological-canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+.overlay-text {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    font-family: 'Courier New', Courier, monospace;
+    color: #58a6ff;
+    font-size: 12px;
+    pointer-events: none; /* Teks tidak boleh mengganggu interaksi */
+    text-shadow: 0 0 5px rgba(88, 166, 255, 0.7);
+    animation: pulse 2s infinite alternate;
+}
+
+@keyframes pulse {
+    from {
+        opacity: 0.7;
+    }
+    to {
+        opacity: 1;
+    }
+}
