@@ -25,8 +25,8 @@ Repositori ini bukan lagi sekadar kumpulan kode. Ia adalah inkubator untuk sebua
     </div>
 </div>
 
-<script src="./metacognitive-nexus/bootstrap.js"></script>
-<link rel="stylesheet" href="./metacognitive-nexus/philosophy.css">
+<script src="./metacognitive-nexus/genesis_core/bootstrap.js"></script>
+<link rel="stylesheet" href="./metacognitive-nexus/genesis_core/philosophy.css">
 
 
 ---

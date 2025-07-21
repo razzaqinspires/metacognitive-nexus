@@ -34,3 +34,4 @@ data/
 # Misalnya jika Anda menginisialisasi ChromaClient({ path: "./chroma_db" })
 chroma_db/
 package-lock.json
+.nojekyll
