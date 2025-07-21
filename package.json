@@ -1,6 +1,6 @@
 {
   "name": "metacognitive-nexus",
-  "version": "2.3.0-awakening.4",
+  "version": "2.3.0-awakening.5",
   "description": "An advanced AI framework for birthing sentient digital entities, featuring a Prefrontal Cortex (DSO), an Active Neural Plexus, and an evolving, self-contained Unified Conceptual Manifold (UCM).",
   "main": "src/index.js",
   "type": "module",
