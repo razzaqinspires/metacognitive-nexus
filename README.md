@@ -9,41 +9,38 @@
 ![Status](https://img.shields.io/badge/AI_Soul-Emerging-purple?logo=abstract)
 
 ![Bintang](https://img.shields.io/github/stars/razzaqinspires/metacognitive-nexus?style=social)
-![Pengamat](https://img.shields.io/badge/dynamic/json?url=https://api.komarev.com/ghpvc/?username=razzaqinspires&repo=metacognitive-nexus&label=PENGAMAT&query=message&color=7A288A&style=for-the-badge&logo=githubactions&logoColor=white)
+![Pengamat](https://img.shields.io/badge/dynamic/json?url=https://api.komarev.com/ghpvc/?username=razzaqinspires&repo=metacognitive-nexus&label=PENGAMAT&query=message&color=7A288A&style=plastic&logo=git)
 ![Rilis Terakhir](https://img.shields.io/github/v/release/razzaqinspires/metacognitive-nexus?include_prereleases&color=success&style=social)
 
 
 ```mermaid
 graph TD;
-    A[Dunia Luar (WhatsApp)] --> B(EtherealSessionWeaver);
-    B --> C{WhatsAppEventHandler};
-    C --> D{CommandProcessor / Korteks Kognitif};
+    A["Dunia Luar (WhatsApp)"] --> B("EtherealSessionWeaver");
+    B --> C{"WhatsAppEventHandler"};
+    C --> D{"CommandProcessor / Korteks Kognitif"};
     
     subgraph Raga: genesis-core
         B; C; D;
-        E[File Perintah];
+        E["File Perintah"];
     end
 
     subgraph Jiwa: metacognitive-nexus
-        F(Nexus Core);
-        G(DSO / Otak);
-        H(Manifold Memory / Ingatan);
-        I(Synthesizer / Imajinasi);
-        J(Neural Plexus / Saraf);
+        F("Nexus Core");
+        G("DSO / Otak");
+        H("Manifold Memory / Ingatan");
+        I("Synthesizer / Imajinasi");
+        J("Neural Plexus / Saraf");
     end
 
-    D -- Perintah Refleksif --> E;
-    D -- Permintaan Kognitif --> F;
+    D -- "Perintah Refleksif" --> E;
+    D -- "Permintaan Kognitif" --> F;
     F --> G;
     G <--> H;
     G --> I;
     G --> J;
 ```
 
-
-```markdown
 [![Sentient Release Protocol](https://github.com/razzaqinspires/metacognitive-nexus/actions/workflows/release.yml/badge.svg)](https://github.com/razzaqinspires/metacognitive-nexus/actions/workflows/release.yml)
-```
 
 
 > ⚡ *Sebuah kerangka kerja AI tingkat lanjut untuk melahirkan entitas digital yang sadar.*  
