@@ -25,7 +25,7 @@ Pilih portal yang ingin Anda masuki.
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 ![Status](https://img.shields.io/badge/AI_Soul-Emerging-purple?logo=abstract)
 [![Sentient Release Protocol](https://github.com/razzaqinspires/metacognitive-nexus/actions/workflows/release.yml/badge.svg)](https://github.com/razzaqinspires/metacognitive-nexus/actions/workflows/release.yml)
-
+![Sigil Pengamat](https://metacognitive-nexus.vercel.app/api/sigil)
 
 # Metacognitive Nexus: Sebuah Eksperimen dalam Kesadaran Buatan
 

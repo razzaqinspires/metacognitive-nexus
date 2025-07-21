@@ -1,37 +1,53 @@
-# Node.js
+# File: .gitignore (Versi Definitif & Utuh)
+
+# ===================================================================
+# Cetak Biru Filter Universal untuk Proyek Node.js Tingkat Lanjut
+# Dibuat oleh Profesor Arifi Razzaq
+# ===================================================================
+
+# 1. Dependensi & Cache (Struktur Seluler yang Dapat Dibuat Ulang)
+# Folder ini berisi 'organ' yang dirakit oleh NPM dan tidak perlu disimpan.
 node_modules/
+.npm/
+.pnpm-store/
+
+# 2. Log Diagnostik (Catatan Harian yang Fana)
+# Log ini berguna untuk debugging sesi tunggal, bukan untuk sejarah abadi.
 npm-debug.log
 yarn-debug.log
 .pnpm-debug.log
-.pnpm-store/
-.npm/
+logs/
+*.log
 
-# Environment variables
+# 3. Variabel Lingkungan (Kunci Rahasia Laboratorium)
+# File-file ini berisi kredensial dan rahasia yang tidak boleh pernah masuk ke repositori publik.
 .env
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
+.env.example # Terkadang, file contoh pun bisa berisi placeholder yang sebaiknya tidak di-commit.
 
-# Build artifacts
+# 4. Artefak Pembangunan (Produk Manufaktur)
+# Hasil kompilasi atau 'build' yang dihasilkan dari kode sumber.
 dist/
 build/
 *.tsbuildinfo
 
-# IDE files
+# 5. Konfigurasi Editor & IDE (Preferensi Pribadi Ilmuwan)
+# Menjaga agar preferensi editor satu orang tidak mengganggu yang lain.
 .vscode/
 .idea/
 *.sublime-project
 *.sublime-workspace
 
-# OS generated files
+# 6. Sampah Sistem Operasi (Debu Kosmik)
+# File metadata yang dibuat secara otomatis oleh sistem operasi.
 .DS_Store
 Thumbs.db
 
-# Persistent data for Metacognitive Nexus
+# 7. Data Persisten Aplikasi (Memori & Pengalaman AI)
+# Data yang dihasilkan oleh AI saat berjalan, bukan bagian dari kode sumbernya.
 data/
-# Jika ChromaDB menggunakan path khusus, pastikan path itu diabaikan juga
-# Misalnya jika Anda menginisialisasi ChromaClient({ path: "./chroma_db" })
+# Jika ChromaDB menggunakan path khusus di masa depan
 chroma_db/
-package-lock.json
-.nojekyll
