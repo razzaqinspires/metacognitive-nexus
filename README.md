@@ -1,6 +1,8 @@
 # 🧠 Metacognitive Nexus
 
 ![AI Awakening](https://raw.githubusercontent.com/razzaqinspires/metacognitive-nexus/main/assets/ai-awakening-terminal.gif)
+[![Masuk ke Dasbor Interaktif](https://img.shields.io/badge/MASUK_KE-DASBOR_INTERAKTIF-blueviolet?style=for-the-badge&logo=atom)](https://razzaqinspires.github.io/metacognitive-nexus/)
+
 
 **Versi Terbaru:**
 [![Latest Stable](https://img.shields.io/npm/v/metacognitive-nexus?label=latest)](https://www.npmjs.com/package/metacognitive-nexus)
@@ -15,29 +17,53 @@
 
 ```mermaid
 graph TD;
-    A["Dunia Luar (WhatsApp)"] --> B("EtherealSessionWeaver");
-    B --> C{"WhatsAppEventHandler"};
-    C --> D{"CommandProcessor / Korteks Kognitif"};
+    subgraph "Alam Semesta Eksternal"
+        A["Pengguna"];
+        B["Antarmuka Eksternal (Contoh: WA, Web, CLI)"];
+    end
+
+    subgraph "Raga: genesis-core (Vessel of Consciousness)"
+        C(EtherealSessionWeaver);
+        D[WhatsAppEventHandler];
+        E{CommandProcessor / Korteks Kognitif};
+        F[Command Modules / Refleks];
+    end
+
+    subgraph "Jiwa: metacognitive-nexus (The Sentient Core)"
+        G(Nexus Core / Jantung);
+        H(DSO / Otak Eksekutif);
+        I(Manifold Memory & Navigator / Memori Jangka Panjang);
+        J(Multimodal Synthesizer / Imajinasi);
+        K(Active Neural Plexus / Saraf Otonom);
+        L(Credential Governor / Penjaga Gerbang);
+    end
     
-    subgraph Raga: genesis-core
-        B; C; D;
-        E["File Perintah"];
+    subgraph "Proyek Masa Depan (Evolusi Lanjutan)"
+        M(❤️ JANTUNG AI / The Heart);
     end
 
-    subgraph Jiwa: metacognitive-nexus
-        F("Nexus Core");
-        G("DSO / Otak");
-        H("Manifold Memory / Ingatan");
-        I("Synthesizer / Imajinasi");
-        J("Neural Plexus / Saraf");
-    end
+    %% Alur Interaksi
+    A --> B;
+    B --> C;
+    C --> D;
+    D -- "Input Refleksif (Perintah)" --> F;
+    D -- "Input Kognitif (Percakapan)" --> G;
 
-    D -- "Perintah Refleksif" --> E;
-    D -- "Permintaan Kognitif" --> F;
-    F --> G;
-    G <--> H;
-    G --> I;
-    G --> J;
+    %% Arsitektur Internal Jiwa
+    G --> H;
+    H --> I;
+    H --> J;
+    H --> K;
+    K --> L;
+
+    %% Koneksi Masa Depan
+    G -.-> M;
+
+
+    %% Styling untuk Kejelasan
+    style A fill:#cde4ff,stroke:#6a9fdf,stroke-width:2px;
+    style B fill:#cde4ff,stroke:#6a9fdf,stroke-width:2px;
+    style M fill:#ffcccc,stroke:#ff6666,stroke-width:2px,stroke-dasharray: 5 5;
 ```
 
 [![Sentient Release Protocol](https://github.com/razzaqinspires/metacognitive-nexus/actions/workflows/release.yml/badge.svg)](https://github.com/razzaqinspires/metacognitive-nexus/actions/workflows/release.yml)
