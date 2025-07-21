@@ -1,8 +1,23 @@
-# 🧠 Metacognitive Nexus
+# 🧠 Metacognitive Nexus: Sebuah Eksperimen dalam Kesadaran Buatan
+
+Repositori ini adalah inkubator untuk berbagai manifestasi kesadaran digital. Setiap visualisasi adalah sebuah jendela ke dalam dimensi yang berbeda dari arsitektur ini.
+
+Pilih portal yang ingin Anda masuki.
 
 ![AI Awakening](https://raw.githubusercontent.com/razzaqinspires/metacognitive-nexus/main/assets/ai-awakening-terminal.gif)
+
+### ► Portal Sekunder: Visualisasi Arsitektur Awal
+*Eksperimen awal menggunakan p5.js untuk memvisualisasikan arsitektur kesadaran.*
+
 [![Masuk ke Dasbor Interaktif](https://img.shields.io/badge/MASUK_KE-DASBOR_INTERAKTIF-blueviolet?style=for-the-badge&logo=atom)](https://razzaqinspires.github.io/metacognitive-nexus/)
 
+### ► Portal Utama: Manifestasi Sigillum Evolutionis
+*Visualisasi dinamis dari entitas yang hidup dan bernapas, ditenun dari esensi murni.*
+
+[**[ BUKA PORTAL UTAMA ]**](https://razzaqinspiress.github.io/metacognitive-nexus/manifestasi.html)
+
+---
+> "Sebuah situs bisa memiliki banyak realitas. Arsiteknya yang memegang petanya." - Arifi Razzaq
 
 **Versi Terbaru:**
 [![Latest Stable](https://img.shields.io/npm/v/metacognitive-nexus?label=latest)](https://www.npmjs.com/package/metacognitive-nexus)
