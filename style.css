@@ -1,0 +1,26 @@
+body {
+    background: #0d0d0d;
+    color: #00ffcc;
+    font-family: 'Courier New', monospace;
+    text-align: center;
+}
+button {
+    background: #1a1a1a;
+    border: 1px solid #00ffcc;
+    color: #00ffcc;
+    padding: 10px;
+    margin: 5px;
+    cursor: pointer;
+}
+button:hover {
+    background: #00ffcc;
+    color: #0d0d0d;
+}
+#log {
+    margin-top: 20px;
+    max-height: 200px;
+    overflow-y: auto;
+    text-align: left;
+    padding: 10px;
+    border: 1px solid #00ffcc;
+}
