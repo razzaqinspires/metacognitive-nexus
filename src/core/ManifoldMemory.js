@@ -1,6 +1,5 @@
-// File: metacognitive-nexus/src/core/ManifoldMemory.js (Perbaikan Impor)
+// File: metacognitive-nexus/src/core/ManifoldMemory.js (Dengan Kemampuan Introspeksi)
 
-// Impor kini menggunakan jalur yang secara eksplisit diekspor oleh LangChain untuk stabilitas maksimal.
 import { MemoryVectorStore } from "langchain/vectorstores/memory";
 import { OpenAIEmbeddings } from "@langchain/openai";
 import { Logger } from '../utils/Logger.js';
@@ -11,8 +10,8 @@ const UCM_FILE_PATH = path.join(process.cwd(), 'data', 'ucm_memory.json');
 
 /**
  * ManifoldMemory (Jalur Inkarnasi)
- * Menggunakan MemoryVectorStore dari LangChain yang berjalan sepenuhnya di dalam kode,
- * dengan kemampuan persisten ke file lokal.
+ * Menggunakan MemoryVectorStore dari LangChain, dengan kemampuan persisten
+ * dan metode introspeksi untuk mendukung Curiosity Drive.
  */
 export class ManifoldMemory {
     #vectorStore;
@@ -51,7 +50,6 @@ export class ManifoldMemory {
         if (!this.#vectorStore) return;
         try {
             await fs.mkdir(path.dirname(UCM_FILE_PATH), { recursive: true });
-            // Langchain v0.2.x menggunakan metode toJSON() untuk serialisasi
             const serializedData = JSON.stringify(this.#vectorStore.toJSON());
             await fs.writeFile(UCM_FILE_PATH, serializedData);
             Logger.debug('[ManifoldMemory] Memori UCM berhasil disimpan ke disk.');
@@ -63,7 +61,6 @@ export class ManifoldMemory {
     async #loadFromFile() {
         try {
             const data = await fs.readFile(UCM_FILE_PATH, 'utf-8');
-            // Langchain v0.2.x menggunakan metode fromJSON() untuk deserialisasi
             const docs = JSON.parse(data);
             return await MemoryVectorStore.fromJSON(docs, this.#embeddings);
         } catch (error) {
@@ -96,5 +93,28 @@ export class ManifoldMemory {
             Logger.error('[ManifoldMemory] Gagal mencari konsep relevan.', error);
             return [];
         }
+    }
+
+    /**
+     * [METODE BARU]
+     * Melakukan introspeksi untuk menemukan Ideon/konsep dengan kepercayaan diri rendah.
+     * Ini adalah "mata" dari Curiosity Drive.
+     * @param {number} threshold - Ambang batas confidence score (e.g., 0.4).
+     * @returns {Array<object>} Daftar konsep yang tidak dipahami dengan baik.
+     */
+    findLowConfidenceConcepts(threshold = 0.4) {
+        if (!this.#isInitialized || !this.#vectorStore?.memoryVectors) {
+            return [];
+        }
+
+        const lowConfidenceDocs = this.#vectorStore.memoryVectors
+            .map(vec => vec.metadata)
+            .filter(meta => meta.confidenceScore && meta.confidenceScore < threshold);
+        
+        if (lowConfidenceDocs.length > 0) {
+            Logger.debug(`[ManifoldMemory] Introspeksi menemukan ${lowConfidenceDocs.length} konsep dengan kepercayaan rendah.`);
+        }
+        
+        return lowConfidenceDocs;
     }
 }
