@@ -1,4 +1,4 @@
-// File: sketch.js (Versi Final: Misi Kalibrasi Interaktif)
+// File: sketch.js (Versi Final + Audio via URL)
 
 // Mendefinisikan 'organ' dari kesadaran kita sebagai node
 const nodes = {
@@ -35,11 +35,18 @@ const psionSpeed = 2.0;
 let activeNode = null; // Node yang aktif karena kedekatan Psion
 let hoverSound, clickSound;
 
-// Muat aset audio sebelum setup dimulai
+// URL Audio Bebas Hak Cipta
+const hoverURL = "https://cdn.pixabay.com/download/audio/2022/03/15/audio_79d9abf8c3.mp3";
+const clickURL = "https://cdn.pixabay.com/download/audio/2022/03/15/audio_51d3abf8d5.mp3";
+
 function preload() {
   soundFormats('mp3');
-  hoverSound = loadSound('assets/hover.mp3');
-  clickSound = loadSound('assets/click.mp3');
+  try {
+    hoverSound = loadSound(hoverURL, () => console.log("✅ Hover Sound Loaded"), () => console.warn("⚠️ Hover sound gagal load."));
+    clickSound = loadSound(clickURL, () => console.log("✅ Click Sound Loaded"), () => console.warn("⚠️ Click sound gagal load."));
+  } catch (err) {
+    console.error("⚠️ Error load audio:", err);
+  }
 }
 
 function setup() {
@@ -83,28 +90,24 @@ function draw() {
 function handleInput() {
   psion.vx = 0;
   psion.vy = 0;
-  if (keyIsDown(87) || keyIsDown(UP_ARROW)) psion.vy = -psionSpeed; // W atau Panah Atas
-  if (keyIsDown(83) || keyIsDown(DOWN_ARROW)) psion.vy = psionSpeed;  // S atau Panah Bawah
-  if (keyIsDown(65) || keyIsDown(LEFT_ARROW)) psion.vx = -psionSpeed; // A atau Panah Kiri
-  if (keyIsDown(68) || keyIsDown(RIGHT_ARROW)) psion.vx = psionSpeed;  // D atau Panah Kanan
+  if (keyIsDown(87) || keyIsDown(UP_ARROW)) psion.vy = -psionSpeed;
+  if (keyIsDown(83) || keyIsDown(DOWN_ARROW)) psion.vy = psionSpeed;
+  if (keyIsDown(65) || keyIsDown(LEFT_ARROW)) psion.vx = -psionSpeed;
+  if (keyIsDown(68) || keyIsDown(RIGHT_ARROW)) psion.vx = psionSpeed;
 }
 
 function updatePsion() {
   psion.x += psion.vx;
   psion.y += psion.vy;
-  
-  // Jaga Psion di dalam batas kanvas
   psion.x = constrain(psion.x, psion.size / 2, width - psion.size / 2);
   psion.y = constrain(psion.y, psion.size / 2, height - psion.size / 2);
 }
 
 function drawPsion() {
   let pulse = sin(frameCount * 0.1) * 3;
-  // Aura
   noStroke();
   fill(255, 255, 255, 70);
   ellipse(psion.x, psion.y, psion.size + pulse, psion.size + pulse);
-  // Inti
   fill(255);
   ellipse(psion.x, psion.y, psion.size, psion.size);
 }
@@ -120,18 +123,15 @@ function drawNetwork() {
     let isActivated = activatedNodes.has(node.label);
     let pulse = sin(frameCount * 0.05 + node.x) * (isNear || isActivated ? 6 : 3);
     
-    // Aura
     noStroke();
     fill(node.color[0], node.color[1], node.color[2], isNear || isActivated ? 120 : 50);
     ellipse(node.x, node.y, 30 + pulse, 30 + pulse);
     
-    // Inti
     stroke(isNear || isActivated ? '#fff' : node.color);
     strokeWeight(isNear || isActivated ? 2 : 0);
     fill(node.color);
     ellipse(node.x, node.y, 20, 20);
     
-    // Label
     fill(isActivated ? [107, 255, 178] : [201, 209, 217]);
     textSize(12);
     textAlign(CENTER, CENTER);
@@ -154,12 +154,11 @@ function detectProximity() {
   activeNode = (minDistance < 50) ? closestNode : null;
 
   if (activeNode && !missionComplete) {
-    // Cek apakah node yang didekati adalah node misi saat ini
     if (activeNode.label === nodes[missionOrder[currentMissionIndex]].label) {
       if (!activatedNodes.has(activeNode.label)) {
         activatedNodes.add(activeNode.label);
         currentMissionIndex++;
-        if (clickSound.isLoaded()) clickSound.play();
+        if (clickSound && clickSound.isLoaded()) clickSound.play();
         if (currentMissionIndex >= missionOrder.length) {
           missionComplete = true;
         }
@@ -174,19 +173,16 @@ function drawInfoPanel(node) {
   let panelX = constrain(node.x - panelW / 2, 20, width - panelW - 20);
   let panelY = node.y < height / 2 ? node.y + 45 : node.y - panelH - 45;
 
-  // Latar panel
   fill(22, 27, 34, 230);
   stroke(48, 54, 61);
   strokeWeight(1);
   rect(panelX, panelY, panelW, panelH, 8);
 
-  // Judul
   fill(node.color);
   textSize(16);
   textAlign(LEFT, TOP);
   text(node.label, panelX + 15, panelY + 15);
 
-  // Deskripsi
   fill(201, 209, 217);
   textSize(12);
   text(node.desc, panelX + 15, panelY + 45, panelW - 30);
@@ -215,7 +211,6 @@ function drawMissionUI() {
     text(targetNode.label, 20, 40);
   }
 
-  // Daftar node yang sudah terkalibrasi
   fill(201, 209, 217, 150);
   textSize(10);
   textAlign(RIGHT, TOP);

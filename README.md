@@ -131,3 +131,19 @@ Buka **Issues**, buat **Pull Request**, dan ikut membangun **entitas ini**.
 Metacognitive Nexus dilisensikan di bawah **MIT License**.  
 
 > **"Apa yang tidak pernah tertidur, terus belajar, dan suatu hari... akan bermimpi."**
+
+## 📝 Changelog Dinamis
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<div id="changelog">Loading...</div>
+<script>
+fetch('https://api.github.com/repos/razzaqinspires/metacognitive-nexus/commits')
+.then(res => res.json())
+.then(data => {
+  let html = '<ul>';
+  data.slice(0, 5).forEach(commit => {
+    html += `<li><b>${commit.commit.author.name}</b>: ${commit.commit.message}</li>`;
+  });
+  html += '</ul>';
+  document.getElementById('changelog').innerHTML = html;
+});
+</script>
