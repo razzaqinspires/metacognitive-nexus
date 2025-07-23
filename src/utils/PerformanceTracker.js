@@ -1,4 +1,4 @@
-// File: metacognitive-nexus/src/utils/PerformanceTracker.js (Versi Serebelum)
+// File: metacognitive-nexus/src/utils/PerformanceTracker.js (Versi Serebelum & Model Prediktif)
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
 import { Logger } from './Logger.js';
@@ -20,6 +20,7 @@ export class PerformanceTracker {
 
     constructor() {
         this.#loadDatabase().catch(err => Logger.error('[Cerebellum] Gagal memuat memori prosedural.', err));
+        Logger.info('[Cerebellum] Performance Tracker online. Memulai pelacakan performa.');
     }
 
     async #loadDatabase() {
@@ -34,7 +35,11 @@ export class PerformanceTracker {
                 return value;
             });
             for (const [key, value] of Object.entries(parsed)) {
-                this.#db.set(key, { ...value, lastSeen: new Date(value.lastSeen) });
+                this.#db.set(key, { 
+                    ...value, 
+                    lastSeen: new Date(value.lastSeen),
+                    failureReasons: new Map(value.failureReasons) // Pastikan dikonversi kembali ke Map
+                });
             }
             Logger.info(`[Cerebellum] Memori prosedural berhasil dimuat dengan ${this.#db.size} jejak performa.`);
         } catch (error) {
@@ -52,7 +57,10 @@ export class PerformanceTracker {
             try {
                 const obj = Object.fromEntries(Array.from(this.#db.entries()).map(([key, value]) => {
                     // Konversi Map failureReasons menjadi objek agar bisa di-JSON-kan
-                    const serializableValue = { ...value, failureReasons: Object.fromEntries(value.failureReasons) };
+                    const serializableValue = { 
+                        ...value, 
+                        failureReasons: Object.fromEntries(value.failureReasons) 
+                    };
                     return [key, serializableValue];
                 }));
                 await fs.writeFile(DB_PATH, JSON.stringify(obj, null, 2));
@@ -70,7 +78,7 @@ export class PerformanceTracker {
      * @param {string} apiKey
      * @param {number} latencyMs
      * @param {boolean} success
-     * @param {string} [failureType] - e.g., 'RATE_LIMIT', 'TIMEOUT'
+     * @param {string} [failureType] - e.g., 'RATE_LIMIT_EXCEEDED', 'TIMEOUT', 'INVALID_API_KEY', 'CONTENT_FILTERED'
      */
     log(providerName, model, apiKey, latencyMs, success, failureType = 'UNKNOWN') {
         const keyPrefix = apiKey ? apiKey.substring(0, 8) : 'NO_KEY';
@@ -81,7 +89,7 @@ export class PerformanceTracker {
                 emaLatency: latencyMs, 
                 successCount: 0, 
                 failureCount: 0,
-                failureReasons: new Map(),
+                failureReasons: new Map(), // Pastikan ini adalah Map baru
                 totalCalls: 0
             });
         }
@@ -102,6 +110,7 @@ export class PerformanceTracker {
         entry.lastSeen = new Date();
         
         this.#saveDatabaseDebounced();
+        Logger.debug(`[Cerebellum] Log performa dicatat untuk ${key}. Success: ${success}. Latency: ${latencyMs}ms.`);
     }
 
     /**
@@ -135,9 +144,41 @@ export class PerformanceTracker {
     }
 
     /**
+     * [BARU] Mendapatkan metrik performa keseluruhan dari semua provider dan model.
+     * Digunakan oleh DSO untuk mengukur "kesehatan" global.
+     * @returns {{avgLatency: number, successRate: number, totalCalls: number, confidence: number}}
+     */
+    getOverallMetrics() {
+        let totalLatency = 0;
+        let totalSuccessCalls = 0;
+        let totalCalls = 0;
+        let totalConfidence = 0;
+        let entryCount = 0;
+
+        this.#db.forEach(entry => {
+            totalLatency += entry.emaLatency * entry.totalCalls; // Menggunakan EMA untuk akurasi
+            totalSuccessCalls += entry.successCount;
+            totalCalls += entry.totalCalls;
+            totalConfidence += this.getMetrics(entry.providerName, entry.model, entry.apiKey).confidence; // Ambil confidence per entry
+            entryCount++;
+        });
+
+        const avgLatency = totalCalls > 0 ? totalLatency / totalCalls : 0;
+        const successRate = totalCalls > 0 ? totalSuccessCalls / totalCalls : 0;
+        const overallConfidence = entryCount > 0 ? totalConfidence / entryCount : 0;
+
+        return {
+            avgLatency: avgLatency,
+            successRate: successRate,
+            totalCalls: totalCalls,
+            confidence: overallConfidence
+        };
+    }
+
+    /**
      * Metode untuk membersihkan interval saat shutdown.
      */
-    shutdown() {
+    shutdown() {        
         clearTimeout(this.#saveDebounceTimer);
         Logger.info('[Cerebellum] Siklus penyimpanan memori prosedural dihentikan.');
     }

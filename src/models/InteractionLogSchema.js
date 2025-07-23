@@ -1,5 +1,10 @@
 // File: metacognitive-nexus/src/models/InteractionLogSchema.js
 
+import { generateInteractionId as uuidv4 } from '../utils/MathHelpers.js'; // Asumsi MathHelpers punya ini, atau buat terpisah
+// Atau tetap pakai ini jika generateInteractionId di-export dari file ini:
+// export function generateInteractionId() { /* ... UUID v4 implementation ... */ }
+
+
 /**
  * Mendefinisikan satu upaya transaksi yang dilakukan oleh DSO.
  * @typedef {object} AttemptTransaction
@@ -9,7 +14,7 @@
  * @property {object} outcome - Hasil dari upaya ini.
  * @property {'SUCCESS' | 'FAILURE'} outcome.status - Status keberhasilan upaya ini.
  * @property {number} outcome.latencyMs - Latensi untuk upaya spesifik ini.
- * @property {string} [outcome.failureReason] - Alasan kegagalan (e.g., 'RATE_LIMIT_EXCEEDED', 'INVALID_API_KEY', 'TIMEOUT', 'CONTENT_FILTER').
+ * @property {string} [outcome.failureReason] - Alasan kegagalan (e.g., 'RATE_LIMIT_EXCEEDED', 'INVALID_API_KEY', 'TIMEOUT', 'CONTENT_FILTERED', 'CONTEXT_LENGTH_EXCEEDED').
  */
 
 /**
@@ -19,6 +24,7 @@
  * @property {string} policyUsed - Nama kebijakan DSO yang digunakan (e.g., 'policy_code_gen').
  * @property {number} topCandidateQlcScore - Skor QLC dari kandidat teratas yang pertama kali dipilih.
  * @property {string} [artisticStyle] - (Jika relevan) Gaya yang dipilih oleh MultimodalSynthesizer.
+ * @property {Array<string>} [fallbackPath] - Jalur fallback yang dicoba oleh DSO.
  */
 
 /**
@@ -28,7 +34,7 @@
  * @property {string} id - ID unik untuk seluruh jejak interaksi.
  * @property {Date} timestamp - Timestamp saat interaksi dimulai.
  * @property {string} userId - ID anonim pengguna.
- * @property {string} platform - Platform asal interaksi.
+ * @property {string} platform - Platform asal interaksi (e.g., 'whatsapp_group', 'whatsapp_private', 'web_dashboard', 'internal_schedule').
  * @property {string} promptText - Teks prompt mentah dari pengguna.
  * @property {CognitiveSnapshot} cognitiveSnapshot - "Pikiran" AI sebelum eksekusi.
  * @property {AttemptTransaction[]} transactions - Rantai kausal dari semua upaya yang dilakukan.
@@ -44,6 +50,7 @@
  * @property {string} [feedback.comment] - Komentar teks.
  * @property {string} [feedback.correctedResponse] - Respons yang disarankan oleh pengguna.
  * @property {string[]} [feedback.tags] - Tag feedback (e.g., ['tidak_akurat', 'membantu']).
+ * @property {object} [promptMetadata] - Metadata tambahan yang diteruskan bersama prompt (misal: command_execution, type_correction).
  */
 export const InteractionLogSchema = {
     id: 'string',
@@ -55,7 +62,8 @@ export const InteractionLogSchema = {
         intent: 'string',
         policyUsed: 'string',
         topCandidateQlcScore: 'number',
-        artisticStyle: 'string'
+        artisticStyle: 'string',
+        fallbackPath: ['string']
     },
     transactions: [{
         attempt_sequence: 'number',
@@ -81,7 +89,8 @@ export const InteractionLogSchema = {
         comment: 'string',
         correctedResponse: 'string',
         tags: ['string']
-    }
+    },
+    promptMetadata: 'object'
 };
 
 /**

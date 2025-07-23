@@ -8,7 +8,7 @@ import { Logger } from './Logger.js';
  */
 export class APIKeyManager {
     // #keys sekarang menyimpan obyek dengan status, bukan hanya string.
-    // { key: string, status: 'active' | 'impaired' | 'compromised', impairedUntil: Date | null }
+    // { key: string, status: 'active' | 'impaired' | 'compromised', impairedUntil: Date | null, failureCount: number }
     #keys = [];
     #providerName;
     #roundRobinIndex = 0; // Tetap menggunakan round-robin untuk kunci yang sehat
@@ -16,7 +16,7 @@ export class APIKeyManager {
     constructor(providerName, keys) {
         this.#providerName = providerName;
         if (!Array.isArray(keys) || keys.length === 0) {
-            Logger.warn(`[KeyGovernor] ${providerName}: Tidak ada kredensial yang disediakan.`);
+            Logger.warn(`[KeyGovernor] ${providerName}: Tidak ada kredensial yang disediakan.`, true); // Tambahkan true untuk log error
             this.#keys = [];
         } else {
             // Ubah array string menjadi struktur obyek yang kaya
@@ -24,6 +24,7 @@ export class APIKeyManager {
                 key: key,
                 status: 'active',
                 impairedUntil: null,
+                failureCount: 0 // Melacak kegagalan per kunci
             }));
             Logger.info(`[KeyGovernor] ${providerName}: Mengawasi ${this.#keys.length} kredensial.`);
         }
@@ -34,89 +35,121 @@ export class APIKeyManager {
      * @returns {string | null} Kunci API yang aktif atau null jika tidak ada.
      */
     getKey() {
-        const activeKeys = this.#keys.filter(k => k.status === 'active');
-        
-        // Cek apakah ada kunci 'impaired' yang sudah bisa dicoba lagi (self-healing)
+        // Filter kunci yang benar-benar aktif atau yang sudah pulih dari impaired
         const now = Date.now();
-        const healedKeys = this.#keys.filter(k => k.status === 'impaired' && k.impairedUntil && now > k.impairedUntil);
+        const activeAndHealedKeys = this.#keys.filter(k => 
+            k.status === 'active' || (k.status === 'impaired' && k.impairedUntil && now > k.impairedUntil)
+        );
         
-        healedKeys.forEach(k => {
-            Logger.info(`[KeyGovernor] Kunci untuk ${this.#providerName} pulih dari status 'impaired'. Mengaktifkan kembali.`);
-            k.status = 'active';
-            k.impairedUntil = null;
-            activeKeys.push(k);
+        // Aktifkan kembali kunci yang pulih
+        activeAndHealedKeys.forEach(k => {
+            if (k.status === 'impaired' && k.impairedUntil && now > k.impairedUntil) {
+                Logger.info(`[KeyGovernor] Kunci untuk ${this.#providerName} (${k.key.substring(0,8)}) pulih dari status 'impaired'. Mengaktifkan kembali.`);
+                k.status = 'active';
+                k.impairedUntil = null;
+                // Jangan reset failureCount sepenuhnya, mungkin ada sisa efek
+            }
         });
 
-        if (activeKeys.length === 0) {
+        const usableKeys = this.#keys.filter(k => k.status === 'active'); // Hanya kunci yang sekarang aktif
+        
+        if (usableKeys.length === 0) {
             Logger.warn(`[KeyGovernor] ${this.#providerName}: Tidak ada kredensial aktif yang tersedia saat ini.`);
             return null;
         }
 
         // Terapkan rotasi round-robin hanya pada kunci yang aktif
-        this.#roundRobinIndex = this.#roundRobinIndex % activeKeys.length;
-        const selectedKey = activeKeys[this.#roundRobinIndex];
+        this.#roundRobinIndex = this.#roundRobinIndex % usableKeys.length;
+        const selectedKey = usableKeys[this.#roundRobinIndex];
         this.#roundRobinIndex++;
 
-        Logger.debug(`[KeyGovernor] ${this.#providerName}: Menyediakan kredensial aktif.`);
+        Logger.debug(`[KeyGovernor] ${this.#providerName}: Menyediakan kredensial aktif: ${selectedKey.key.substring(0,8)}.`);
         return selectedKey.key;
     }
 
     /**
      * Menerima laporan dari sistem tingkat atas (DSO) tentang status sebuah kunci.
      * @param {string} failedKey - Kunci spesifik yang gagal.
-     * @param {'RATE_LIMIT' | 'INVALID_KEY' | 'OTHER'} failureType - Jenis kegagalan.
+     * @param {string} failureType - Jenis kegagalan (e.g., 'RATE_LIMIT_EXCEEDED', 'INVALID_API_KEY', 'TIMEOUT', 'CONTENT_FILTER').
      */
     reportStatus(failedKey, failureType) {
         const keyObject = this.#keys.find(k => k.key === failedKey);
         if (!keyObject) return;
 
+        keyObject.failureCount++; // Tingkatkan hit kegagalan
+
         switch (failureType) {
-            case 'RATE_LIMIT':
+            case 'RATE_LIMIT_EXCEEDED':
                 keyObject.status = 'impaired';
-                // Istirahatkan selama 60 detik sebelum mencoba lagi
-                keyObject.impairedUntil = Date.now() + 60 * 1000;
-                Logger.warn(`[KeyGovernor] Kunci untuk ${this.#providerName} diistirahatkan sementara karena RATE_LIMIT.`);
+                // Durasi istirahat adaptif berdasarkan frekuensi kegagalan
+                const rateLimitDuration = 60 * 1000 * Math.min(5, keyObject.failureCount); // 1, 2, 3, 4, 5 menit
+                keyObject.impairedUntil = Date.now() + rateLimitDuration;
+                Logger.warn(`[KeyGovernor] Kunci untuk ${this.#providerName} (${keyObject.key.substring(0,8)}) diistirahatkan sementara karena RATE_LIMIT (${keyObject.failureCount}x). Pulih dalam ${rateLimitDuration / 1000}s.`);
                 break;
-            case 'INVALID_KEY':
+            case 'INVALID_API_KEY':
                 keyObject.status = 'compromised';
                 keyObject.impairedUntil = null; // Karantina permanen
-                Logger.error(`[KeyGovernor] Kritis: Kunci untuk ${this.#providerName} terdeteksi tidak valid dan dikarantina secara permanen.`);
+                Logger.error(`[KeyGovernor] Kritis: Kunci untuk ${this.#providerName} (${keyObject.key.substring(0,8)}) terdeteksi tidak valid dan dikarantina secara permanen.`);
+                break;
+            case 'CONTENT_FILTERED': // Untuk kasus seperti Gemini
+            case 'CONTEXT_LENGTH_EXCEEDED': // Untuk kasus OpenAI
+                // Ini bukan masalah kunci, jadi jangan karantina kunci
+                Logger.warn(`[KeyGovernor] Kunci ${this.#providerName} (${keyObject.key.substring(0,8)}) mengalami error konten/konteks. Tidak dikarantina.`);
+                // Bisa reset failureCount jika ini bukan masalah kunci
+                keyObject.failureCount = Math.max(0, keyObject.failureCount - 1); // Turunkan sedikit
                 break;
             default:
                 // Untuk error lain, kita anggap sementara
                 keyObject.status = 'impaired';
-                keyObject.impairedUntil = Date.now() + 30 * 1000; // Istirahat singkat
-                Logger.warn(`[KeyGovernor] Kunci untuk ${this.#providerName} diistirahatkan karena error sementara.`);
+                const defaultImpairDuration = 30 * 1000 * Math.min(3, keyObject.failureCount); // 30s, 60s, 90s
+                keyObject.impairedUntil = Date.now() + defaultImpairDuration;
+                Logger.warn(`[KeyGovernor] Kunci untuk ${this.#providerName} (${keyObject.key.substring(0,8)}) diistirahatkan karena error sementara (${keyObject.failureCount}x). Pulih dalam ${defaultImpairDuration / 1000}s.`);
                 break;
         }
     }
 
     /**
-     * Mengembalikan semua kunci, terlepas dari statusnya (untuk debugging).
-     * @returns {string[]}
+     * Mengembalikan status spesifik dari sebuah kunci.
+     * @param {string} keyString Kunci yang ingin diperiksa.
+     * @returns {'active' | 'impaired' | 'compromised' | 'not_found'}
      */
-    getAllKeys() {
-        return this.#keys.map(k => k.key);
+    getIndividualKeyStatus(keyString) {
+        const keyObject = this.#keys.find(k => k.key === keyString);
+        if (!keyObject) return 'not_found';
+        if (keyObject.status === 'impaired' && keyObject.impairedUntil && Date.now() > keyObject.impairedUntil.getTime()) {
+            // Jika sudah expired, secara konseptual aktif kembali (tapi status di objek belum berubah)
+            return 'active';
+        }
+        return keyObject.status;
     }
 
     /**
-     * Memeriksa apakah ada setidaknya satu kunci yang aktif.
+     * Mengembalikan semua kunci, terlepas dari statusnya (untuk debugging dan diagnostik).
+     * @returns {Array<object>}
+     */
+    getAllKeys() {
+        return this.#keys.map(k => k.key); // Mengembalikan array string kunci
+    }
+
+    /**
+     * Memeriksa apakah ada setidaknya satu kunci yang aktif atau dapat pulih.
      * @returns {boolean}
      */
     hasActiveKeys() {
-        // Cek juga kunci yang bisa pulih
         const now = Date.now();
         return this.#keys.some(k => k.status === 'active' || (k.status === 'impaired' && k.impairedUntil && now > k.impairedUntil));
     }
 
     /**
-     * Mereset status semua kunci kembali ke 'active'. Berguna saat AI "bangun dari tidur".
+     * Mereset status semua kunci kembali ke 'active' (kecuali 'compromised').
+     * Berguna saat AI "bangun dari tidur" atau setelah perbaikan sistem.
      */
     resetAllKeyStatuses() {
         this.#keys.forEach(k => {
             if (k.status !== 'compromised') { // Jangan aktifkan kembali kunci yang sudah pasti rusak
                 k.status = 'active';
                 k.impairedUntil = null;
+                k.failureCount = 0; // Reset failure count saat direset
             }
         });
         this.#roundRobinIndex = 0;

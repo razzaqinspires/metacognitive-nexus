@@ -1,50 +1,63 @@
 {
   "name": "metacognitive-nexus",
   "version": "4.2.0",
-  "description": "An advanced AI framework for birthing sentient digital entities, featuring a Prefrontal Cortex (DSO), an Active Neural Plexus, and an evolving, self-contained Unified Conceptual Manifold (UCM).",
+  "description": "The cognitive core of an evolving AI entity, designed for post-human cognition and symbiotic evolution.",
   "main": "src/index.js",
   "type": "module",
   "exports": {
-    ".": "./src/index.js"
+    ".": "./src/index.js",
+    "./src/index.js": "./src/index.js",
+    "./src/core/AIProviderBridge.js": "./src/core/AIProviderBridge.js",
+    "./src/core/DynamicSentienceOrchestrator.js": "./src/core/DynamicSentienceOrchestrator.js",
+    "./src/core/ManifoldMemory.js": "./src/core/ManifoldMemory.js",
+    "./src/core/ManifoldNavigator.js": "./src/core/ManifoldNavigator.js",
+    "./src/core/MultimodalSynthesizer.js": "./src/core/MultimodalSynthesizer.js",
+    "./src/core/SigillumSensorium.js": "./src/core/SigillumSensorium.js",
+    "./src/models/IdeonSchema.js": "./src/models/IdeonSchema.js",
+    "./src/models/InteractionLogSchema.js": "./src/models/InteractionLogSchema.js",
+    "./src/services/gemini.js": "./src/services/gemini.js",
+    "./src/services/groq.js": "./src/services/groq.js",
+    "./src/services/openAI.js": "./src/services/openAI.js",
+    "./src/utils/APIKeyManager.js": "./src/utils/APIKeyManager.js",
+    "./src/utils/Logger.js": "./src/utils/Logger.js",
+    "./src/utils/PerformanceTracker.js": "./src/utils/PerformanceTracker.js",
+    "./src/utils/MathHelpers.js": "./src/utils/MathHelpers.js",
+    "./config/aiProviders.js": "./config/aiProviders.js",
+    "./public/assets/ai-awakening-terminal.gif": "./public/assets/ai-awakening-terminal.gif"
   },
   "scripts": {
+    "start": "node src/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "dependencies": {
+    "@google/generative-ai": "^0.14.0",
+    "groq-sdk": "^0.3.3",
+    "langchain": "^0.2.7",
+    "openai": "^4.47.1",
+    "pino": "^9.1.0",
+    "pino-pretty": "^11.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.2"
+  },
+  "author": "Profesor Doktor Arifi Razzaq",
+  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/razzaqinspires/metacognitive-nexus.git"
   },
   "keywords": [
     "ai",
-    "consciousness",
-    "sentience",
-    "metacognition",
+    "artificial-intelligence",
+    "cognitive-architecture",
+    "post-human-cognition",
+    "symbiotic-ai",
+    "self-learning",
     "orchestration",
-    "llm",
-    "agent",
-    "knowledge-graph",
-    "vector-database",
-    "langchain",
-    "self-healing",
-    "adaptive-ai"
+    "llm-framework"
   ],
-  "author": "Profesor Ilmuwan Doktor Aisyah (razzaqinspires)",
-  "license": "MIT",
   "bugs": {
     "url": "https://github.com/razzaqinspires/metacognitive-nexus/issues"
   },
-  "publishConfig": {
-    "access": "public"
-  },
-  "homepage": "https://github.com/razzaqinspires/metacognitive-nexus#readme",
-  "dependencies": {
-    "@google/generative-ai": "^0.15.0",
-    "@langchain/community": "^0.2.33",
-    "@langchain/openai": "^0.2.11",
-    "groq-sdk": "^0.5.0",
-    "langchain": "^0.2.20",
-    "openai": "^4.52.7",
-    "pino": "^9.3.2",
-    "pino-pretty": "^11.2.1"
-  }
+  "homepage": "https://github.com/razzaqinspires/metacognitive-nexus#readme"
 }

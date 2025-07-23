@@ -1,21 +1,21 @@
 // File: metacognitive-nexus/src/models/IdeonSchema.js
 
-import { createHash } from 'node:crypto';
+import { createHash } from 'node:crypto'; // Perbaikan impor
 
 /**
  * Mendefinisikan hubungan semantik berbobot antar Ideon.
  * @typedef {object} IdeonRelation
  * @property {string} targetIdeonId - ID dari Ideon lain.
- * @property {'RELATED_TO' | 'PREREQUISITE_FOR' | 'EXAMPLE_OF' | 'TOOL_FOR' | 'ANTONYM_OF' | 'SYNONYM_OF' | 'DERIVED_FROM' | 'METAPHOR_FOR'} type - Sifat dari hubungan.
+ * @property {'RELATED_TO' | 'PREREQUISITE_FOR' | 'EXAMPLE_OF' | 'TOOL_FOR' | 'ANTONYM_OF' | 'SYNONYM_OF' | 'DERIVED_FROM' | 'METAPHOR_FOR' | 'IMPLIES' | 'CONTRADICTS' | 'CAUSES' | 'PART_OF'} type - Sifat dari hubungan.
  * @property {number} weight - Kekuatan hubungan (0.0 - 1.0).
  */
 
 /**
  * Mendefinisikan satu sudut pandang atau konteks dari sebuah Ideon.
  * @typedef {object} IdeonPerspective
- * @property {string} context - Konteks dari perspektif ini (e.g., 'technical', 'philosophical', 'historical').
+ * @property {string} context - Konteks dari perspektif ini (e.g., 'technical', 'philosophical', 'historical', 'emotional').
  * @property {string} description - Deskripsi Ideon dari sudut pandang ini.
- * @property {string} vectorId - ID dari vektor deskripsi ini di dalam ManifoldMemory.
+ * @property {string | null} vectorId - ID dari vektor deskripsi ini di dalam ManifoldMemory (untuk pencarian semantik).
  */
 
 /**
@@ -29,9 +29,9 @@ import { createHash } from 'node:crypto';
 /**
  * Mendefinisikan bagaimana sebuah Ideon dapat memodulasi parameter sistem lain.
  * @typedef {object} HeuristicModulator
- * @property {'DSO_POLICY' | 'SYNTHESIZER_STYLE'} targetSystem - Sistem yang akan dipengaruhi.
- * @property {string} parameter - Parameter yang akan diubah (e.g., 'w_l', 'default_style').
- * @property {string} modification - Operasi yang dilakukan (e.g., 'temp_increase(0.2)', 'set("anime")').
+ * @property {'DSO_POLICY' | 'SYNTHESIZER_STYLE' | 'COMMAND_GUARD_THRESHOLD' | 'TASK_SCHEDULE'} targetSystem - Sistem yang akan dipengaruhi.
+ * @property {string} parameter - Parameter yang akan diubah (e.g., 'w_l', 'default_style', 'spam_threshold').
+ * @property {string} modification - Operasi yang dilakukan (e.g., 'temp_increase(0.2)', 'set("anime")', 'adjust_by_factor(0.9)').
  */
 
 /**
@@ -41,7 +41,7 @@ import { createHash } from 'node:crypto';
  * @property {string} canonicalName - Nama utama yang paling representatif.
  * @property {string[]} aliases - Nama-nama alternatif.
  * @property {IdeonPerspective[]} perspectives - Berbagai sudut pandang terhadap Ideon ini.
- * @property {string[]} categories - Kategori tingkat tinggi.
+ * @property {string[]} categories - Kategori tingkat tinggi (e.g., 'Concept', 'Command', 'Entity', 'Event').
  * @property {IdeonRelation[]} relations - Jaringan hubungan semantik yang kaya.
  * @property {IdeonActivation} activation - Keadaan energi dan peluruhan dinamisnya.
  * @property {number} confidenceScore - Keyakinan AI terhadap pemahamannya (berbeda dari aktivasi).
@@ -55,12 +55,12 @@ export const IdeonSchema = {
     perspectives: [{
         context: 'string',
         description: 'string',
-        vectorId: 'string'
+        vectorId: 'string' // Bisa null sampai di-embed
     }],
     categories: ['string'],
     relations: [{
         targetIdeonId: 'string',
-        type: 'string',
+        type: 'string', // Dibatasi oleh tipe dalam IdeonRelation
         weight: 'number'
     }],
     activation: {
