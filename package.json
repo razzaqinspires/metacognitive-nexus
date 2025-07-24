@@ -1,6 +1,6 @@
 {
   "name": "metacognitive-nexus",
-  "version": "4.3.2",
+  "version": "4.3.3",
   "description": "The cognitive core of an evolving AI entity, designed for post-human cognition and symbiotic evolution.",
   "main": "src/index.js",
   "type": "module",
