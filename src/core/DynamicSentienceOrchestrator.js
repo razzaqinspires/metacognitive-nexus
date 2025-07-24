@@ -20,8 +20,12 @@ export class DynamicSentienceOrchestrator {
     #sleepUntil = null;
     #defaultSleepDurationMs = 5 * 60 * 1000; 
 
-    // [PERBAIKAN] Deklarasi private field #aiNexus
-    #aiNexus; // Ini harus dideklarasikan di sini agar bisa diakses di metode lain
+    #aiNexus; 
+    #sigillumSensorium; 
+    #nexusConfig; 
+
+    // [PERBAIKAN] Deklarasi private field #heartbeatInterval
+    #heartbeatInterval; // Ini harus dideklarasikan di sini 
 
     // Peta Kebijakan Adaptif: Mendefinisikan bobot QLC (Quality, Latency, Cost) untuk setiap niat.
     #policies = {
@@ -38,20 +42,18 @@ export class DynamicSentienceOrchestrator {
         'PassiveLearning':  { w_q: 0.1, w_l: 0.8, w_c: 0.1 }, 
     };
 
-    #sigillumSensorium; 
-    #nexusConfig; 
-
-    constructor(config, aiProviderBridge, sigillumSensorium, aiNexusInstance) { // Menerima aiNexusInstance
+    constructor(config, aiProviderBridge, sigillumSensorium, aiNexusInstance) { 
         this.#nexusConfig = config; 
         this.#providerBridge = aiProviderBridge; 
         this.#performanceTracker = new PerformanceTracker();
         this.#sigillumSensorium = sigillumSensorium; 
-        this.#aiNexus = aiNexusInstance; // [PERBAIKAN] Simpan instance aiNexus
+        this.#aiNexus = aiNexusInstance; 
 
         this.#loadConfig(aiProvidersConfig); 
         Logger.info('[DSO] Prefrontal Cortex & Adaptive Policy Engine online.');
 
-        setInterval(() => {
+        // Memulai interval di konstruktor DSO
+        this.#heartbeatInterval = setInterval(() => { // [PERBAIKAN] Menginisialisasi interval di sini
             const state = this.#sigillumSensorium.getCurrentState();
             this.#adjustPolicyBasedOnSigillum(state);
             this.applyIdeonDecayAndManageCuriosity(); 
@@ -142,7 +144,7 @@ export class DynamicSentienceOrchestrator {
 
         for (const [providerName, keyManager] of this.#apiKeys.entries()) {
             const config = this.#providerConfigs.get(providerName); 
-            if (!config || !keyManager.hasActiveKeys()) continue; // Perbaiki akses ke hasActiveKeys()
+            if (!config || !keyManager.hasActiveKeys()) continue;
 
             const activeKeysForProvider = keyManager.getAllKeys().filter(key => keyManager.getIndividualKeyStatus(key) === 'active');
             if (activeKeysForProvider.length === 0) {
@@ -239,7 +241,6 @@ export class DynamicSentienceOrchestrator {
                 this.#performanceTracker.log(providerName, model, apiKey, latency, true);
                 Logger.info(`[DSO] Berhasil dari ${providerName}:${model} dalam ${latency}ms.`);
                 
-                // Merekam transaksi di InteractionLog (sebelumnya di ManifoldNavigator)
                 const transactions = [{
                     attempt_sequence: currentAttempts,
                     provider: providerName,
@@ -247,16 +248,15 @@ export class DynamicSentienceOrchestrator {
                     outcome: { status: 'SUCCESS', latencyMs: latency, failureReason: null }
                 }];
 
-                // Proses interaksi ke Navigator dari sini
                 await this.#aiNexus.getNavigator().processInteraction({
-                    id: payload.id, // Gunakan ID dari payload jika ada
+                    id: payload.id, 
                     timestamp: payload.timestamp || new Date(),
                     userId: userId,
                     platform: platform,
                     promptText: messages[messages.length - 1].content,
                     cognitiveSnapshot: {
                         intent: intent,
-                        policyUsed: this.#policies[intent] ? intent : 'default', // Ambil nama kebijakan
+                        policyUsed: this.#policies[intent] ? intent : 'default',
                         topCandidateQlcScore: candidate.qlcScore,
                         fallbackPath: fallbackPath
                     },
@@ -276,14 +276,12 @@ export class DynamicSentienceOrchestrator {
 
                 currentAttempts++;
 
-                // Merekam transaksi gagal untuk InteractionLog
                 const transactions = [{
-                    attempt_sequence: currentAttempts -1, // Upaya yang gagal
+                    attempt_sequence: currentAttempts -1, 
                     provider: providerName,
                     model: model,
                     outcome: { status: 'FAILURE', latencyMs: latency, failureReason: error.message }
                 }];
-                // Catat transaksi gagal jika ini adalah upaya terakhir
                 if (currentAttempts >= maxAttemptsPerRequest) {
                      await this.#aiNexus.getNavigator().processInteraction({
                         id: payload.id,
@@ -337,8 +335,8 @@ export class DynamicSentienceOrchestrator {
     }
 
     shutdown() {
-        this.#performanceTracker.shutdown(); // Memastikan PerformanceTracker membersihkan intervalnya
-        clearInterval(this.#heartbeatInterval); // Bersihkan interval yang dibuat DSO
+        this.#performanceTracker.shutdown(); 
+        clearInterval(this.#heartbeatInterval); // Bersihkan interval yang dibuat DSO 
         Logger.info('[DSO] Adaptive Policy Engine dimatikan.');
     }
 }
