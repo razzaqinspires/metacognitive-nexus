@@ -5,7 +5,7 @@ import { ManifoldMemory } from './core/ManifoldMemory.js';
 import { ManifoldNavigator } from './core/ManifoldNavigator.js';
 import { MultimodalSynthesizer } from './core/MultimodalSynthesizer.js';
 import { AIProviderBridge } from './core/AIProviderBridge.js';
-import { Logger } from './utils/Logger.js';
+import { Logger } from './utils/Logger.js'; // Impor Logger dari jalur internalnya
 import { SigillumSensorium } from './core/SigillumSensorium.js';
 
 export class MetacognitiveNexus {
@@ -36,9 +36,7 @@ export class MetacognitiveNexus {
             this.#memory = new ManifoldMemory({ apiKey: config.apiKeys.openai[0], config: config });
             this.#synthesizer = new MultimodalSynthesizer({ apiKey: config.apiKeys.openai[0], config: config });
             
-            // [PERBAIKAN KRITIS] Meneruskan instance MetacognitiveNexus ke DSO
-            // Ini agar DSO dapat memanggil this.#aiNexus.getNavigator() dan this.#aiNexus.getMemory()
-            this.#dso = new DynamicSentienceOrchestrator(config, this.#bridge, this.#sigillumSensorium, this); // Passing 'this'
+            this.#dso = new DynamicSentienceOrchestrator(config, this.#bridge, this.#sigillumSensorium, this);
 
             this.#navigator = new ManifoldNavigator(this.#memory, (learningData) => {
                 if (this.#dso) this.#dso.updateHeuristics(learningData);
@@ -85,11 +83,6 @@ export class MetacognitiveNexus {
         this.#dso.applyIdeonDecayAndManageCuriosity();
     }
 
-    /**
-     * Meminta teks dari AI dengan menerapkan kebijakan yang relevan dengan konteks.
-     * @param {object} payload Payload interaksi lengkap.
-     * @returns {Promise<object>} Obyek hasil yang kaya informasi.
-     */
     async getAIResponse(payload) { 
         if (this.#status === 'degraded' || this.#status === 'shutdown') {
             const errorMsg = `Nexus tidak dapat memproses. Status: ${this.#status}`;
@@ -97,18 +90,11 @@ export class MetacognitiveNexus {
             return { response: null, error: new Error(errorMsg), success: false };
         }
 
-        // [PERBAIKAN] Langsung meneruskan payload ke DSO
         const dsoResult = await this.#dso.generateText(payload);
         
         return dsoResult;
     }
 
-    /**
-     * Meminta AI untuk membayangkan/menghasilkan gambar.
-     * @param {string} basePrompt Prompt dasar untuk gambar.
-     * @param {object} options Opsi tambahan.
-     * @returns {Promise<string | null>} URL gambar yang dihasilkan.
-     */
     async imagine(basePrompt, options = {}) {
         if (this.#status !== 'active') {
              Logger.warn(`[NexusCore] Imajinasi ditolak. Status: ${this.#status}`);
@@ -173,7 +159,6 @@ export class MetacognitiveNexus {
         clearInterval(this.#heartbeatInterval);
         if (this.#bridge) this.#bridge.shutdown();
         if (this.#dso) this.#dso.shutdown(); 
-        // Jika modul lain memiliki metode shutdown, panggil di sini
         if (this.#memory && typeof this.#memory.shutdown === 'function') this.#memory.shutdown(); 
         if (this.#synthesizer && typeof this.#synthesizer.shutdown === 'function') this.#synthesizer.shutdown();
         if (this.#navigator && typeof this.#navigator.shutdown === 'function') this.#navigator.shutdown();
@@ -186,3 +171,5 @@ export class MetacognitiveNexus {
     getDSO = () => this.#dso;
     getSynthesizer = () => this.#synthesizer;
 }
+
+export { Logger };

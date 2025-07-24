@@ -21,7 +21,8 @@
     "./src/utils/APIKeyManager.js": "./src/utils/APIKeyManager.js",
     "./src/utils/Logger.js": "./src/utils/Logger.js",
     "./src/utils/PerformanceTracker.js": "./src/utils/PerformanceTracker.js",
-    "./src/utils/MathHelpers.js": "./src/utils/MathHelpers.js", "./config/aiProviders.js": "./config/aiProviders.js",
+    "./src/utils/MathHelpers.js": "./src/utils/MathHelpers.js",
+    "./config/aiProviders.js": "./config/aiProviders.js",
     "./public/assets/ai-awakening-terminal.gif": "./public/assets/ai-awakening-terminal.gif"
   },
   "scripts": {
