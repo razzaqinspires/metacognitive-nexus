@@ -25,10 +25,11 @@ export function cosineSimilarity(vecA, vecB) {
 }
 
 /**
- * Menghasilkan UUID v4.
- * @returns {string}
+ * Menghasilkan ID unik standar (UUID v4) untuk interaksi.
+ * Nama fungsi diubah agar konsisten dengan penggunaan sebelumnya di InteractionLogSchema.
+ * @returns {string} UUID v4 string.
  */
-export function generateUUID() {
+export function generateInteractionId() { // Nama fungsi diubah dari generateUUID
     if (typeof crypto !== 'undefined' && crypto.randomUUID) {
         return crypto.randomUUID();
     }

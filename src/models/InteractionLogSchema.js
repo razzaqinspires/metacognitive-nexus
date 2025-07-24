@@ -1,9 +1,7 @@
 // File: metacognitive-nexus/src/models/InteractionLogSchema.js
 
-import { generateInteractionId as uuidv4 } from '../utils/MathHelpers.js'; // Asumsi MathHelpers punya ini, atau buat terpisah
-// Atau tetap pakai ini jika generateInteractionId di-export dari file ini:
-// export function generateInteractionId() { /* ... UUID v4 implementation ... */ }
-
+// Impor langsung generateInteractionId dari MathHelpers.js
+import { generateInteractionId } from '../utils/MathHelpers.js'; 
 
 /**
  * Mendefinisikan satu upaya transaksi yang dilakukan oleh DSO.
@@ -93,18 +91,6 @@ export const InteractionLogSchema = {
     promptMetadata: 'object'
 };
 
-/**
- * Menghasilkan ID unik standar (UUID v4) untuk setiap jejak interaksi.
- * @returns {string}
- */
-export function generateInteractionId() {
-    // Implementasi UUID v4 yang lebih kuat dan sesuai standar
-    if (typeof crypto !== 'undefined' && crypto.randomUUID) {
-        return crypto.randomUUID();
-    }
-    // Fallback untuk lingkungan yang lebih tua
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-        var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
-        return v.toString(16);
-    });
-}
+// Fungsi generateInteractionId sekarang diimpor dari MathHelpers.js.
+// Jika ada kode duplikat di sini sebelumnya, itu harus dihapus.
+export { generateInteractionId }; // Re-export untuk kompatibilitas jika ada yang mengimpor dari sini
