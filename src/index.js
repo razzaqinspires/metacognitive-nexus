@@ -6,7 +6,7 @@ import { ManifoldNavigator } from './core/ManifoldNavigator.js';
 import { MultimodalSynthesizer } from './core/MultimodalSynthesizer.js';
 import { AIProviderBridge } from './core/AIProviderBridge.js';
 import { Logger } from './utils/Logger.js';
-import { SigillumSensorium } from './core/SigillumSensorium.js'; // Impor SigillumSensorium
+import { SigillumSensorium } from './core/SigillumSensorium.js';
 
 export class MetacognitiveNexus {
     #status = 'initializing';
@@ -16,9 +16,9 @@ export class MetacognitiveNexus {
     #navigator;
     #synthesizer;
     #bridge;
-    #sigillumSensorium; // Properti baru untuk SigillumSensorium
-    publicConfig; // Menyimpan konfigurasi yang relevan secara publik
-    coreContext = {}; // Objek untuk menyimpan referensi ke semua inti
+    #sigillumSensorium; 
+    publicConfig; 
+    coreContext = {}; 
 
     constructor(config) {
         if (!config || !config.apiKeys?.openai || config.apiKeys.openai.length === 0) {
@@ -27,25 +27,23 @@ export class MetacognitiveNexus {
             throw new Error(errorMsg);
         }
         
-        this.publicConfig = config; // Simpan konfigurasi lengkap
+        this.publicConfig = config; 
 
         try {
-            this.#bridge = AIProviderBridge.getInstance(); // Singleton
-            this.#sigillumSensorium = new SigillumSensorium(); // Inisialisasi Sensorium
+            this.#bridge = AIProviderBridge.getInstance(); 
+            this.#sigillumSensorium = new SigillumSensorium(); 
 
-            // Meneruskan konfigurasi lengkap ke ManifoldMemory
             this.#memory = new ManifoldMemory({ apiKey: config.apiKeys.openai[0], config: config });
             this.#synthesizer = new MultimodalSynthesizer({ apiKey: config.apiKeys.openai[0], config: config });
             
-            // Meneruskan instance SigillumSensorium dan konfigurasi lengkap ke DSO
-            this.#dso = new DynamicSentienceOrchestrator(config, this.#bridge, this.#sigillumSensorium);
-            
-            // Meneruskan konfigurasi lengkap ke Navigator
+            // [PERBAIKAN KRITIS] Meneruskan instance MetacognitiveNexus ke DSO
+            // Ini agar DSO dapat memanggil this.#aiNexus.getNavigator() dan this.#aiNexus.getMemory()
+            this.#dso = new DynamicSentienceOrchestrator(config, this.#bridge, this.#sigillumSensorium, this); // Passing 'this'
+
             this.#navigator = new ManifoldNavigator(this.#memory, (learningData) => {
                 if (this.#dso) this.#dso.updateHeuristics(learningData);
-            }, config); // Meneruskan config
+            }, config);
 
-            // Populate coreContext for easy access
             this.coreContext = {
                 dso: this.#dso,
                 memory: this.#memory,
@@ -84,7 +82,6 @@ export class MetacognitiveNexus {
             this.#status = 'active';
             Logger.info('[NexusCore] Homeostasis: DSO telah bangun.');
         }
-        // Memicu peluruhan ideon di ManifoldMemory secara berkala melalui DSO
         this.#dso.applyIdeonDecayAndManageCuriosity();
     }
 
@@ -93,24 +90,15 @@ export class MetacognitiveNexus {
      * @param {object} payload Payload interaksi lengkap.
      * @returns {Promise<object>} Obyek hasil yang kaya informasi.
      */
-    async getAIResponse(payload) { // Menerima payload lengkap
+    async getAIResponse(payload) { 
         if (this.#status === 'degraded' || this.#status === 'shutdown') {
             const errorMsg = `Nexus tidak dapat memproses. Status: ${this.#status}`;
             Logger.error(`[NexusCore] ${errorMsg}`);
             return { response: null, error: new Error(errorMsg), success: false };
         }
 
-        // Meneruskan payload lengkap ke DSO
+        // [PERBAIKAN] Langsung meneruskan payload ke DSO
         const dsoResult = await this.#dso.generateText(payload);
-
-        // Navigator akan dipanggil secara internal oleh DSO setelah hasil transaksi
-        // Jadi tidak perlu panggil lagi di sini kecuali ada logika tambahan di NexusCore
-        // await this.#navigator.processInteraction({
-        //     prompt: payload.messages[payload.messages.length - 1].content, // Ambil prompt terakhir
-        //     ...dsoResult,
-        //     userId: payload.userId,
-        //     platform: payload.platform
-        // });
         
         return dsoResult;
     }
@@ -127,11 +115,9 @@ export class MetacognitiveNexus {
              return null;
         }
         
-        // Cari Ideon relevan, bukan hanya konsep teks
         const relevantIdeons = await this.#memory.findRelevantConcepts(basePrompt, 3); 
         const imageUrl = await this.#synthesizer.generateImage(basePrompt, relevantIdeons);
         
-        // Catat interaksi imagine ke Navigator
         if (imageUrl) {
             await this.#navigator.processInteraction({
                 id: `imagine-result-${Date.now()}`,
@@ -142,10 +128,10 @@ export class MetacognitiveNexus {
                 cognitiveSnapshot: {
                     intent: 'ImageGeneration',
                     policyUsed: 'MultimodalSynthesizer',
-                    topCandidateQlcScore: 1.0, // Asumsi berhasil tinggi
-                    artisticStyle: options.style // Merekam gaya yang digunakan
+                    topCandidateQlcScore: 1.0, 
+                    artisticStyle: options.style 
                 },
-                transactions: [], // Transaksi imagine berbeda, bisa ditambahkan di sini
+                transactions: [], 
                 finalOutcome: { success: true, response: imageUrl, error: null },
                 promptMetadata: { type: 'image_generation', style: options.style }
             });
@@ -172,21 +158,12 @@ export class MetacognitiveNexus {
         };
     }
 
-    /**
-     * [BARU] Metode untuk memperbarui status ontologis (Sigillum) dari event eksternal (Git/CI).
-     * @param {string} eventType - Tipe event (e.g., 'COMMIT', 'CI_STATUS').
-     * @param {object} eventData - Data terkait event.
-     */
     updateOntologicalStateFromGitEvent(eventType, eventData) {
         if (this.#sigillumSensorium) {
             this.#sigillumSensorium.updateSigillumState(eventType, eventData);
         }
     }
 
-    /**
-     * [BARU] Mengembalikan status Sigillum saat ini.
-     * @returns {{purity: number, symmetry: number, fractureCount: number}}
-     */
     getSigillumState() {
         return this.#sigillumSensorium ? this.#sigillumSensorium.getCurrentState() : null;
     }
@@ -195,10 +172,11 @@ export class MetacognitiveNexus {
         Logger.info('[NexusCore] Menerima perintah shutdown...');
         clearInterval(this.#heartbeatInterval);
         if (this.#bridge) this.#bridge.shutdown();
-        if (this.#dso) this.#dso.shutdown(); // Memastikan DSO membersihkan intervalnya
-        if (this.#memory) this.#memory.shutdown(); // Jika Memory memiliki resource untuk dibersihkan
-        if (this.#synthesizer) this.#synthesizer.shutdown(); // Jika Synthesizer memiliki resource untuk dibersihkan
-        if (this.#navigator) this.#navigator.shutdown(); // Jika Navigator memiliki resource untuk dibersihkan
+        if (this.#dso) this.#dso.shutdown(); 
+        // Jika modul lain memiliki metode shutdown, panggil di sini
+        if (this.#memory && typeof this.#memory.shutdown === 'function') this.#memory.shutdown(); 
+        if (this.#synthesizer && typeof this.#synthesizer.shutdown === 'function') this.#synthesizer.shutdown();
+        if (this.#navigator && typeof this.#navigator.shutdown === 'function') this.#navigator.shutdown();
         this.#status = 'shutdown';
         Logger.info('[NexusCore] Framework telah dimatikan.');
     }
